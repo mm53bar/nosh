@@ -1,5 +1,9 @@
 <% content_for :title, "#{@recipe.title} — nosh" %>
 
+<% content_for :head do %>
+  <script type="application/ld+json"><%= json_escape(recipe_structured_data(@recipe).to_json).html_safe %></script>
+<% end %>
+
 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
   <div class="md:col-span-2">
     <div class="flex items-start justify-between">
