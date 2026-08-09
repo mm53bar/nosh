@@ -13,24 +13,7 @@
 <% if @recipes.empty? %>
   <p class="text-stone-500">No recipes found.</p>
 <% else %>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    <% @recipes.each do |recipe| %>
-      <%= link_to recipe, class: "block border rounded-lg overflow-hidden bg-white hover:shadow-md transition" do %>
-        <% if recipe.image.attached? %>
-          <%= image_tag recipe.image, class: "w-full h-40 object-cover" %>
-        <% else %>
-          <div class="w-full h-40 bg-stone-200 flex items-center justify-center text-stone-400">No image</div>
-        <% end %>
-        <div class="p-3">
-          <h2 class="font-semibold"><%= recipe.title %></h2>
-          <p class="text-sm text-stone-500">
-            <%= [ recipe.cuisine, recipe.meal_type ].compact_blank.join(" · ") %>
-          </p>
-          <% if recipe.rating %>
-            <p class="text-amber-500 text-sm"><%= "★" * recipe.rating %></p>
-          <% end %>
-        </div>
-      <% end %>
-    <% end %>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <%= render partial: "card", collection: @recipes, as: :recipe %>
   </div>
 <% end %>

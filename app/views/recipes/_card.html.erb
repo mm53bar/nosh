@@ -1,0 +1,30 @@
+<%# Locals: recipe (required)
+    Rails Blocks "Card with Featured Image" (railsblocks.com/docs/card), retinted from its
+    default blue/neutral to nosh's existing stone/amber palette to match blip/tsundoku. %>
+<%= link_to recipe, class: "group block bg-white rounded-xl overflow-hidden border border-black/10 shadow-xs hover:shadow-md transition-shadow" do %>
+  <div class="aspect-video bg-stone-200 overflow-hidden">
+    <% if recipe.image.attached? %>
+      <%= image_tag recipe.image, class: "w-full h-full object-center object-cover group-hover:scale-[1.02] transition-transform duration-300" %>
+    <% else %>
+      <div class="w-full h-full flex items-center justify-center text-stone-400 text-sm">No image</div>
+    <% end %>
+  </div>
+  <div class="px-4 py-3">
+    <div class="flex items-center gap-2 mb-1">
+      <% if recipe.cuisine.present? %>
+        <span class="inline-flex items-center rounded-md bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-700 outline outline-amber-600/20">
+          <%= recipe.cuisine %>
+        </span>
+      <% end %>
+      <% if recipe.meal_type.present? %>
+        <span class="text-xs text-stone-500"><%= recipe.meal_type %></span>
+      <% end %>
+    </div>
+    <h3 class="text-lg font-semibold text-stone-900 leading-snug line-clamp-2 group-hover:text-amber-700">
+      <%= recipe.title %>
+    </h3>
+    <% if recipe.rating %>
+      <p class="text-amber-500 text-sm mt-1"><%= "★" * recipe.rating %></p>
+    <% end %>
+  </div>
+<% end %>
