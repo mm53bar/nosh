@@ -1,0 +1,38 @@
+<%# Rails Blocks navbar (railsblocks.com), retinted from neutral/blue to nosh's
+    stone/amber palette to match blip/tsundoku. The dropdown/mobile-hamburger
+    interaction logic (navbar_controller.js in the original component) is
+    deliberately NOT copied in — nosh has no dropdown nav items and no items
+    array long enough to need a mobile hamburger, so that ~1000 lines of
+    open/close/positioning JS would be pure unused scaffolding. If a dropdown
+    is ever actually needed, pull navbar_controller.js in at that point. %>
+<% items ||= [] %>
+<% variant ||= "default" %>
+<% classes ||= nil %>
+<% logo ||= nil %>
+
+<%
+  base_nav = "flex w-fit justify-center"
+  nav_classes = [ base_nav, classes ].compact.reject(&:empty?).join(" ")
+
+  base_menu = "m-0 flex list-none items-center gap-1 p-1"
+  variant_menu = case variant.to_s
+                 when "transparent"
+                   "bg-transparent"
+                 else
+                   "rounded-lg border border-stone-200 bg-white shadow"
+                 end
+  menu_classes = [ base_menu, variant_menu ].join(" ")
+%>
+
+<nav class="<%= nav_classes %>">
+  <ul class="<%= menu_classes %>">
+    <% if logo.present? %>
+      <li><%= logo.html_safe %></li>
+    <% end %>
+
+    <% items.each do |item| %>
+      <%= render "shared/components/navbar/navbar_item",
+            label: item[:label], href: item[:href], active: item[:active] || false %>
+    <% end %>
+  </ul>
+</nav>

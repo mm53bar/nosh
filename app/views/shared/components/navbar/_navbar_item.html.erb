@@ -1,0 +1,15 @@
+<% label ||= "" %>
+<% href ||= nil %>
+<% active ||= false %>
+
+<%
+  base_classes = "block rounded-md px-3 py-2 text-sm font-medium no-underline select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-600"
+  state_classes = active ? "text-stone-900 bg-stone-100" : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
+  link_classes = "#{base_classes} #{state_classes}"
+%>
+
+<li>
+  <a href="<%= href %>" class="<%= link_classes %>">
+    <%= label %>
+  </a>
+</li>

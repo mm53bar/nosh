@@ -10,6 +10,9 @@ Rails.application.routes.draw do
       post :made  # mark last_made_on = today
       post :image # fetch-by-URL image attach (raw upload just posts :image to create/update)
     end
+    collection do
+      post :import # create from a source URL's schema.org/Recipe JSON-LD
+    end
   end
 
   resources :meal_plan_entries, only: [ :index, :create, :destroy ]
@@ -20,8 +23,6 @@ Rails.application.routes.draw do
   resources :shopping_list_items, only: [ :update ] do
     collection { patch :bulk_update }
   end
-
-  resource :settings, only: [ :show, :update ]
 
   get "/stats", to: "stats#show"
 end

@@ -26,11 +26,24 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
 - Recipe photos are Active Storage attachments (`has_one_attached :image`), fetched by URL
   (`POST /recipes/:id/image`) or uploaded directly as the `image` param on create/update — no
   hand-rolled upload path or `data/images/` directory like the old app.
-- Any feature that needs FlareSolverr (or another external service) to work around a
-  Cloudflare-protected site must be optional and configured through the in-app Settings page, not
-  a required env var — see `docs/adr/20260809-settings-in-database.md`. Nothing in this app
-  requires FlareSolverr as of the initial build; the setting is infrastructure for whenever a
-  future feature (e.g. porting nanoclaw's recipe-discovery scraper into the app) needs it.
+- UI components come from **Rails Blocks** (railsblocks.com — the operator has a Pro account;
+  ask if a component looks paywalled) — check `tsundoku`'s `app/views/shared/components/` first,
+  since it's already copied a lot of what nosh needs. Retint from the default blue/neutral to
+  nosh's stone/amber palette when pulling one in. Don't copy interaction JS (e.g. the navbar's
+  dropdown controller) for behavior the page doesn't actually use — that's exactly the kind of
+  unused scaffolding tsundoku's own history warns against.
+- No manual "add a recipe" form linked from the UI (the old app didn't have one either — recipes
+  arrive via migration or LLM-driven discovery adding through the JSON API). The one add path in
+  the UI is pasting a source URL, which `RecipeImporter` resolves by reading the page's embedded
+  schema.org/Recipe JSON-LD (the same structured data nosh's own show page emits). `/recipes/new`
+  still works as a manual fallback, just isn't linked anywhere.
+- The recipe list's search/sidebar filtering is entirely client-side
+  (`recipe_filter_controller.js`) over the full preloaded card grid — no Turbo Frame round-trip.
+  Fine at this scale (~150 recipes); revisit if the collection grows enough for that to matter.
+- No Settings model/page. Finding new recipes from external sites is nanoclaw's/the LLM
+  automation layer's job (`recipe-discovery.py`), not this app's — there's nothing in nosh that
+  needs FlareSolverr or similar, so don't add operator-settings infrastructure ahead of an actual
+  need. See `docs/adr/20260809-no-settings-recipe-discovery-is-nanoclaws-job.md`.
 - Secrets are a plain **env var** (`SECRET_KEY_BASE`) — this repo is public, so
   `config/credentials.yml.enc` is git-ignored and never committed; env is the blessed source,
   Rails encrypted credentials remain an optional escape hatch. See

@@ -23,15 +23,20 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="bg-stone-50 text-stone-900">
-    <header class="bg-stone-900 text-stone-100">
-      <nav class="container mx-auto px-5 py-4 flex items-center gap-6">
-        <%= link_to "🍲 nosh", root_path, class: "text-lg font-semibold" %>
-        <%= link_to "Recipes", recipes_path, class: "hover:text-amber-300" %>
-        <%= link_to "Meal Plan", meal_plan_entries_path, class: "hover:text-amber-300" %>
-        <%= link_to "Shopping List", shopping_list_path, class: "hover:text-amber-300" %>
-        <%= link_to "Settings", settings_path, class: "ml-auto hover:text-amber-300" %>
-      </nav>
+  <body class="bg-stone-50 text-stone-900 min-h-screen">
+    <header class="border-b border-stone-200 bg-white">
+      <div class="container mx-auto px-5 py-4 flex items-center gap-6">
+        <%= link_to root_path, class: "text-lg font-semibold" do %>
+          🍲 nosh
+        <% end %>
+        <%= render "shared/components/navbar/navbar",
+              variant: "transparent",
+              items: [
+                { label: "Recipes", href: recipes_path, active: controller_name == "recipes" },
+                { label: "Meal Plan", href: meal_plan_entries_path, active: controller_name == "meal_plan_entries" },
+                { label: "Shopping List", href: shopping_list_path, active: controller_name == "shopping_lists" }
+              ] %>
+      </div>
     </header>
 
     <main class="container mx-auto px-5 py-8">
@@ -43,5 +48,16 @@
 
       <%= yield %>
     </main>
+
+    <footer class="container mx-auto px-5 py-6 text-xs text-stone-400 text-center">
+      <% sha = Rails.configuration.x.git_sha %>
+      <% short = Rails.configuration.x.git_sha_short %>
+      <% if sha.present? && !%w[dev unknown].include?(sha) %>
+        <%= link_to short, "https://github.com/mm53bar/nosh/commit/#{sha}",
+              target: "_blank", rel: "noopener", class: "font-mono hover:text-stone-600" %>
+      <% else %>
+        <span class="font-mono"><%= short %></span>
+      <% end %>
+    </footer>
   </body>
 </html>

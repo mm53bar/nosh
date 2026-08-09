@@ -4,12 +4,18 @@ class RecipesController < ApplicationController
   before_action :set_recipe, only: [ :show, :edit, :update, :destroy, :made, :image ]
 
   def index
-    @recipes = Recipe.includes(:tags, image_attachment: :blob).order(:title)
-    @recipes = @recipes.where("title LIKE ?", "%#{params[:search]}%") if params[:search].present?
-    @recipes = @recipes.joins(:tags).where(tags: { name: params[:tag] }) if params[:tag].present?
-    @recipes = @recipes.where(cuisine: params[:cuisine]) if params[:cuisine].present?
-    @recipes = @recipes.where(rating: nil) if params[:unrated] == "true"
-    @recipes = @recipes.distinct
+    @recipes = Recipe.includes(:tags, image_attachment: :blob).order(created_at: :desc)
+
+    respond_to do |format|
+      format.html { load_facets }
+      format.json do
+        @recipes = @recipes.where("title LIKE ?", "%#{params[:search]}%") if params[:search].present?
+        @recipes = @recipes.joins(:tags).where(tags: { name: params[:tag] }) if params[:tag].present?
+        @recipes = @recipes.where(cuisine: params[:cuisine]) if params[:cuisine].present?
+        @recipes = @recipes.where(rating: nil) if params[:unrated] == "true"
+        @recipes = @recipes.distinct
+      end
+    end
   end
 
   def show
@@ -93,7 +99,30 @@ class RecipesController < ApplicationController
     end
   end
 
+  # Creates a recipe from a source page's embedded schema.org/Recipe JSON-LD
+  # — the "add a recipe" entry point, replacing a manual-entry form button
+  # (the old app never had one either; recipes are either migrated or
+  # imported this way).
+  def import
+    result = RecipeImporter.new(params[:url]).call
+    if result.success?
+      redirect_to result.recipe, notice: "Imported \"#{result.recipe.title}\"."
+    else
+      redirect_to recipes_path, alert: result.error
+    end
+  end
+
   private
+
+  # Sidebar facet option lists — computed from the loaded set rather than a
+  # separate query, and kept in a fixed (not alphabetical) order for effort
+  # and rating so the sidebar reads Quick→Involved, 5★→1★→Unrated.
+  def load_facets
+    @cuisines = @recipes.filter_map(&:cuisine).uniq.sort
+    @meal_types = @recipes.filter_map(&:meal_type).uniq.sort
+    @efforts = %w[Quick Medium Involved] & @recipes.filter_map { |r| helpers.recipe_effort(r) }.uniq
+    @ratings = %w[5 4 3 2 1 unrated] & @recipes.map { |r| (r.rating || "unrated").to_s }.uniq
+  end
 
   def set_recipe
     @recipe = Recipe.find(params[:id])

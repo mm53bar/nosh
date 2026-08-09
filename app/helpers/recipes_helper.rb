@@ -22,6 +22,19 @@ module RecipesHelper
     }.compact
   end
 
+  # Effort facet for the recipe-list sidebar — the old app had one, but
+  # nothing in the data model tracks it directly, so it's bucketed from
+  # total_time_minutes rather than being its own stored field.
+  EFFORT_BUCKETS = [ [ 30, "Quick" ], [ 60, "Medium" ] ].freeze
+
+  def recipe_effort(recipe)
+    minutes = recipe.total_time_minutes
+    return nil if minutes.blank?
+
+    _, label = EFFORT_BUCKETS.find { |max, _| minutes <= max }
+    label || "Involved"
+  end
+
   private
 
   def iso8601_minutes(minutes)

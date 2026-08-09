@@ -1,19 +1,64 @@
 <% content_for :title, "Recipes — nosh" %>
 
-<div class="flex items-center justify-between mb-6">
-  <h1 class="text-2xl font-bold">Recipes</h1>
-  <%= link_to "+ New Recipe", new_recipe_path, class: "bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700" %>
-</div>
+<h1 class="text-2xl font-bold mb-6">Recipes</h1>
 
-<%= form_with url: recipes_path, method: :get, class: "mb-6 flex gap-3" do |f| %>
-  <%= f.text_field :search, value: params[:search], placeholder: "Search recipes…", class: "border rounded-md px-3 py-2 flex-1" %>
-  <%= f.submit "Search", class: "border rounded-md px-4 py-2 bg-white hover:bg-stone-100" %>
+<%# The old app never had a manual "add recipe" button — recipes arrive via
+    migration or LLM-driven discovery. This is the one add path in the UI:
+    paste a source URL and RecipeImporter reads its schema.org/Recipe JSON-LD. %>
+<%= form_with url: import_recipes_path, method: :post, class: "mb-6 flex gap-3" do |f| %>
+  <%= f.url_field :url, placeholder: "Paste a recipe URL to import…", required: true, class: "border rounded-md px-3 py-2 flex-1" %>
+  <%= f.submit "Import", class: "bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700" %>
 <% end %>
 
 <% if @recipes.empty? %>
-  <p class="text-stone-500">No recipes found.</p>
+  <p class="text-stone-500">No recipes yet — paste a URL above to import one.</p>
 <% else %>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    <%= render partial: "card", collection: @recipes, as: :recipe %>
+  <div class="grid grid-cols-1 lg:grid-cols-[16rem_1fr] gap-8" data-controller="recipe-filter">
+    <aside class="space-y-6">
+      <div class="relative">
+        <input type="search"
+               data-recipe-filter-target="input"
+               data-action="input->recipe-filter#search"
+               placeholder="Search recipes…"
+               autocomplete="off"
+               class="w-full pl-3 pr-8 py-2 text-sm rounded-md border border-stone-300 bg-white focus:border-amber-600 focus:ring-amber-600 focus:outline-none">
+        <button type="button"
+                data-action="recipe-filter#clear"
+                aria-label="Clear filters"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <% { "Cuisine" => [ "cuisine", @cuisines ], "Meal type" => [ "mealType", @meal_types ],
+           "Effort" => [ "effort", @efforts ], "Rating" => [ "rating", @ratings ] }.each do |label, (facet, values)| %>
+        <% next if values.empty? %>
+        <div>
+          <h2 class="text-sm font-semibold text-stone-700 mb-2"><%= label %></h2>
+          <div class="space-y-1">
+            <% values.each do |value| %>
+              <label class="flex items-center gap-2 text-sm text-stone-600 cursor-pointer">
+                <%= check_box_tag "#{facet}_#{value}", value, false,
+                      data: { recipe_filter_target: "facetCheckbox", facet: facet, action: "change->recipe-filter#filter" },
+                      class: "rounded border-stone-300 text-amber-600 focus:ring-amber-600" %>
+                <%= value == "unrated" ? "Unrated" : (facet == "rating" ? "#{value}★" : value) %>
+              </label>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </aside>
+
+    <div>
+      <p class="text-sm text-stone-500 mb-3">
+        <span data-recipe-filter-target="count"><%= @recipes.size %></span> recipes
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+        <%= render partial: "card", collection: @recipes, as: :recipe %>
+      </div>
+
+      <p data-recipe-filter-target="empty" hidden class="text-stone-500 mt-6">No recipes match your filters.</p>
+    </div>
   </div>
 <% end %>

@@ -1,5 +1,12 @@
 # 20260809 — Operator settings live in the database, not just env
 
+> **Superseded the same day** by
+> [`20260809-no-settings-recipe-discovery-is-nanoclaws-job.md`](20260809-no-settings-recipe-discovery-is-nanoclaws-job.md).
+> The premise below (nosh might eventually need FlareSolverr for its own recipe-discovery feature)
+> turned out to be wrong — that feature belongs to nanoclaw/the LLM layer, not this app. Kept for
+> the record of what was considered; the `Setting` model, `settings` table, and this decision are
+> reverted.
+
 ## Context
 
 Some recipe sites (HelloFresh CA, Chef's Plate) sit behind Cloudflare and block plain HTTP

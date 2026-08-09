@@ -1,7 +1,17 @@
 <%# Locals: recipe (required)
     Rails Blocks "Card with Featured Image" (railsblocks.com/docs/card), retinted from its
-    default blue/neutral to nosh's existing stone/amber palette to match blip/tsundoku. %>
-<%= link_to recipe, class: "group block bg-white rounded-xl overflow-hidden border border-black/10 shadow-xs hover:shadow-md transition-shadow" do %>
+    default blue/neutral to nosh's existing stone/amber palette to match blip/tsundoku.
+    data-* attributes are read by recipe_filter_controller.js for client-side filtering. %>
+<%= link_to recipe,
+      class: "group block bg-white rounded-xl overflow-hidden border border-black/10 shadow-xs hover:shadow-md transition-shadow",
+      data: {
+        recipe_filter_target: "card",
+        searchable: recipe.title.downcase,
+        cuisine: recipe.cuisine,
+        meal_type: recipe.meal_type,
+        effort: recipe_effort(recipe),
+        rating: recipe.rating || "unrated"
+      } do %>
   <div class="aspect-video bg-stone-200 overflow-hidden">
     <% if recipe.image.attached? %>
       <%= image_tag recipe.image, class: "w-full h-full object-center object-cover group-hover:scale-[1.02] transition-transform duration-300" %>
