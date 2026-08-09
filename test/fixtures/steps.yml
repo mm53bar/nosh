@@ -1,0 +1,9 @@
+one:
+  recipe: one
+  instruction: Press and cube the tofu.
+  position: 1
+
+two:
+  recipe: two
+  instruction: Saute onions and garlic.
+  position: 1

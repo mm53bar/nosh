@@ -1,0 +1,20 @@
+one:
+  recipe: one
+  amount: "200"
+  unit: g
+  name: Tofu
+  position: 1
+
+two:
+  recipe: one
+  amount: "1"
+  unit: tbsp
+  name: Soy Sauce
+  position: 2
+
+three:
+  recipe: two
+  amount: "2"
+  unit: cup
+  name: Black Beans
+  position: 1

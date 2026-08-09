@@ -1,0 +1,34 @@
+<% content_for :title, "Meal Plan — nosh" %>
+
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold">Meal Plan</h1>
+  <div class="flex gap-2">
+    <%= link_to "← Previous week", meal_plan_entries_path(start: @start_date - 7, end: @end_date - 7), class: "border rounded-md px-3 py-1.5 hover:bg-stone-100" %>
+    <%= link_to "Next week →", meal_plan_entries_path(start: @start_date + 7, end: @end_date + 7), class: "border rounded-md px-3 py-1.5 hover:bg-stone-100" %>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-7 gap-4">
+  <% (@start_date..@end_date).each do |date| %>
+    <div class="border rounded-lg p-3">
+      <h2 class="font-semibold text-sm text-stone-500"><%= date.strftime("%a %-d") %></h2>
+
+      <% (@entries_by_date[date] || []).each do |entry| %>
+        <div class="mt-2 flex items-start justify-between gap-1">
+          <%= link_to entry.recipe.title, entry.recipe, class: "text-sm hover:underline" %>
+          <%= button_to "✕", meal_plan_entry_path(entry), method: :delete,
+                form: { data: { turbo_confirm: "Remove from meal plan?" } }, class: "text-red-500 text-xs" %>
+        </div>
+      <% end %>
+
+      <%= form_with url: meal_plan_entries_path, method: :post, class: "mt-3", data: { controller: "auto-submit" } do %>
+        <%= hidden_field_tag "meal_plan_entry[date]", date %>
+        <%= hidden_field_tag :redirect_start, @start_date %>
+        <%= hidden_field_tag :redirect_end, @end_date %>
+        <%= select_tag "meal_plan_entry[recipe_id]", options_from_collection_for_select(@recipes, :id, :title),
+              include_blank: "+ Add recipe…", class: "text-sm border rounded-md px-2 py-1 w-full mt-1",
+              data: { action: "change->auto-submit#submit" } %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

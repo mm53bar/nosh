@@ -1,0 +1,39 @@
+<% content_for :title, "Shopping List — nosh" %>
+
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold">Shopping List</h1>
+  <%= button_to "Clear list", shopping_list_path, method: :delete,
+        form: { data: { turbo_confirm: "Clear the whole shopping list?" } }, class: "border rounded-md px-3 py-1.5 hover:bg-red-50 text-red-700" %>
+</div>
+
+<%= form_with url: generate_shopping_list_path, method: :post, class: "flex gap-3 items-end mb-6" do %>
+  <div>
+    <label class="block text-sm font-medium">From</label>
+    <%= date_field_tag :start_date, Date.current.beginning_of_week, class: "border rounded-md px-2 py-1" %>
+  </div>
+  <div>
+    <label class="block text-sm font-medium">To</label>
+    <%= date_field_tag :end_date, Date.current.end_of_week, class: "border rounded-md px-2 py-1" %>
+  </div>
+  <%= submit_tag "Generate from meal plan", class: "bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700" %>
+<% end %>
+
+<% if @items.empty? %>
+  <p class="text-stone-500">The shopping list is empty.</p>
+<% else %>
+  <% @items.group_by(&:category).each do |category, items| %>
+    <h2 class="font-semibold mt-6 mb-2"><%= category || "Uncategorized" %></h2>
+    <ul class="space-y-1">
+      <% items.each do |item| %>
+        <li class="flex items-center gap-2">
+          <%= form_with model: item, url: shopping_list_item_path(item), method: :patch, data: { controller: "auto-submit" } do |f| %>
+            <%= f.check_box :checked, data: { action: "change->auto-submit#submit" }, class: "size-4" %>
+          <% end %>
+          <span class="<%= "line-through text-stone-400" if item.checked %>">
+            <%= [ item.amount, item.unit, item.name ].compact_blank.join(" ") %>
+          </span>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>

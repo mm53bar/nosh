@@ -1,0 +1,24 @@
+one:
+  title: Tofu Noodle Stir-Fry
+  source_url: https://example.com/tofu-noodle-stir-fry
+  description: Quick weeknight stir-fry.
+  servings: 4
+  cuisine: Asian
+  meal_type: dinner
+  prep_time_minutes: 15
+  total_time_minutes: 30
+  notes: Double the sauce.
+  rating: 4
+  last_made_on: 2026-08-01
+
+two:
+  title: Veggie Chili
+  source_url: https://example.com/veggie-chili
+  description: Hearty vegetarian chili.
+  servings: 6
+  cuisine: American
+  meal_type: dinner
+  prep_time_minutes: 10
+  total_time_minutes: 45
+  rating: 5
+  last_made_on: 2026-07-20

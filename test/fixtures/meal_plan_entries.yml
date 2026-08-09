@@ -1,0 +1,9 @@
+one:
+  date: 2026-08-11
+  recipe: one
+  servings: 8
+  notes: Double batch
+
+two:
+  date: 2026-08-12
+  recipe: two

@@ -1,0 +1,75 @@
+<% content_for :title, "#{@recipe.title} — nosh" %>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+  <div class="md:col-span-2">
+    <div class="flex items-start justify-between">
+      <h1 class="text-2xl font-bold"><%= @recipe.title %></h1>
+      <div class="flex gap-2">
+        <%= link_to "Edit", edit_recipe_path(@recipe), class: "border rounded-md px-3 py-1.5 hover:bg-stone-100" %>
+        <%= button_to "Delete", recipe_path(@recipe), method: :delete, data: { turbo_confirm: "Delete this recipe?" }, class: "border rounded-md px-3 py-1.5 hover:bg-red-50 text-red-700" %>
+      </div>
+    </div>
+
+    <p class="text-stone-500 mt-1">
+      <%= [ @recipe.cuisine, @recipe.meal_type ].compact_blank.join(" · ") %>
+      <% if @recipe.servings %> · Serves <%= @recipe.servings %><% end %>
+    </p>
+
+    <% if @recipe.source_url.present? %>
+      <p class="mt-1"><%= link_to "Source", @recipe.source_url, class: "text-amber-700 hover:underline", target: "_blank", rel: "noopener" %></p>
+    <% end %>
+
+    <% if @recipe.description.present? %>
+      <p class="mt-4 text-stone-700"><%= @recipe.description %></p>
+    <% end %>
+
+    <h2 class="text-lg font-semibold mt-6">Ingredients</h2>
+    <ul class="mt-2 space-y-1">
+      <% @recipe.ingredients.each do |ingredient| %>
+        <li>
+          <%= [ ingredient.amount, ingredient.unit, ingredient.name ].compact_blank.join(" ") %>
+        </li>
+      <% end %>
+    </ul>
+
+    <h2 class="text-lg font-semibold mt-6">Steps</h2>
+    <ol class="mt-2 space-y-3 list-decimal list-inside" data-controller="step-checklist">
+      <% @recipe.steps.each do |step| %>
+        <li>
+          <label class="flex items-start gap-2">
+            <input type="checkbox" data-step-checklist-target="checkbox" data-action="change->step-checklist#toggle" class="mt-1">
+            <span data-step-checklist-target="text"><%= step.instruction %></span>
+          </label>
+        </li>
+      <% end %>
+    </ol>
+
+    <% if @recipe.tags.any? %>
+      <div class="mt-6 flex gap-2 flex-wrap">
+        <% @recipe.tags.each do |tag| %>
+          <span class="bg-stone-200 text-stone-700 text-sm px-2 py-1 rounded-full"><%= tag.name %></span>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%= button_to "Mark as made today", made_recipe_path(@recipe), method: :post, class: "mt-6 bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700" %>
+  </div>
+
+  <div>
+    <% if @recipe.image.attached? %>
+      <%= image_tag @recipe.image, class: "w-full rounded-lg" %>
+    <% end %>
+
+    <dl class="mt-4 text-sm text-stone-600 space-y-1">
+      <% if @recipe.prep_time_minutes %>
+        <div><dt class="inline font-medium">Prep:</dt> <dd class="inline"><%= @recipe.prep_time_minutes %> min</dd></div>
+      <% end %>
+      <% if @recipe.total_time_minutes %>
+        <div><dt class="inline font-medium">Total:</dt> <dd class="inline"><%= @recipe.total_time_minutes %> min</dd></div>
+      <% end %>
+      <% if @recipe.last_made_on %>
+        <div><dt class="inline font-medium">Last made:</dt> <dd class="inline"><%= @recipe.last_made_on.to_fs(:long) %></dd></div>
+      <% end %>
+    </dl>
+  </div>
+</div>

@@ -1,0 +1,98 @@
+<%= form_with model: @recipe, class: "space-y-6 max-w-3xl" do |f| %>
+  <% if @recipe.errors.any? %>
+    <div class="bg-red-100 text-red-800 rounded-md px-4 py-3">
+      <ul class="list-disc list-inside">
+        <% @recipe.errors.full_messages.each do |message| %><li><%= message %></li><% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :title, class: "block font-medium" %>
+    <%= f.text_field :title, class: "border rounded-md px-3 py-2 w-full" %>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <%= f.label :cuisine, class: "block font-medium" %>
+      <%= f.text_field :cuisine, class: "border rounded-md px-3 py-2 w-full" %>
+    </div>
+    <div>
+      <%= f.label :meal_type, class: "block font-medium" %>
+      <%= f.text_field :meal_type, class: "border rounded-md px-3 py-2 w-full" %>
+    </div>
+    <div>
+      <%= f.label :servings, class: "block font-medium" %>
+      <%= f.number_field :servings, class: "border rounded-md px-3 py-2 w-full" %>
+    </div>
+    <div>
+      <%= f.label :rating, class: "block font-medium" %>
+      <%= f.number_field :rating, min: 1, max: 5, class: "border rounded-md px-3 py-2 w-full" %>
+    </div>
+    <div>
+      <%= f.label :prep_time_minutes, "Prep time (min)", class: "block font-medium" %>
+      <%= f.number_field :prep_time_minutes, class: "border rounded-md px-3 py-2 w-full" %>
+    </div>
+    <div>
+      <%= f.label :total_time_minutes, "Total time (min)", class: "block font-medium" %>
+      <%= f.number_field :total_time_minutes, class: "border rounded-md px-3 py-2 w-full" %>
+    </div>
+  </div>
+
+  <div>
+    <%= f.label :source_url, class: "block font-medium" %>
+    <%= f.url_field :source_url, class: "border rounded-md px-3 py-2 w-full" %>
+  </div>
+
+  <div>
+    <%= f.label :description, class: "block font-medium" %>
+    <%= f.text_area :description, rows: 3, class: "border rounded-md px-3 py-2 w-full" %>
+  </div>
+
+  <div>
+    <%= f.label :notes, class: "block font-medium" %>
+    <%= f.text_area :notes, rows: 2, class: "border rounded-md px-3 py-2 w-full" %>
+  </div>
+
+  <div>
+    <%= f.label :image, class: "block font-medium" %>
+    <%= f.file_field :image, accept: "image/*", class: "block" %>
+  </div>
+
+  <div>
+    <%= f.label :tag_names_text, "Tags (comma-separated)", class: "block font-medium" %>
+    <%= f.text_field :tag_names_text, class: "border rounded-md px-3 py-2 w-full" %>
+  </div>
+
+  <div data-controller="nested-fields">
+    <h2 class="font-medium">Ingredients</h2>
+    <div data-nested-fields-target="rows" class="space-y-2 mt-2">
+      <%= f.fields_for :ingredients do |ingredient_form| %>
+        <%= render "ingredient_fields", form: ingredient_form %>
+      <% end %>
+    </div>
+    <template data-nested-fields-target="template">
+      <%= f.fields_for :ingredients, Ingredient.new, child_index: "NEW_RECORD" do |ingredient_form| %>
+        <%= render "ingredient_fields", form: ingredient_form %>
+      <% end %>
+    </template>
+    <button type="button" data-action="nested-fields#add" class="text-amber-700 text-sm mt-2">+ Add ingredient</button>
+  </div>
+
+  <div data-controller="nested-fields">
+    <h2 class="font-medium">Steps</h2>
+    <div data-nested-fields-target="rows" class="space-y-2 mt-2">
+      <%= f.fields_for :steps do |step_form| %>
+        <%= render "step_fields", form: step_form %>
+      <% end %>
+    </div>
+    <template data-nested-fields-target="template">
+      <%= f.fields_for :steps, Step.new, child_index: "NEW_RECORD" do |step_form| %>
+        <%= render "step_fields", form: step_form %>
+      <% end %>
+    </template>
+    <button type="button" data-action="nested-fields#add" class="text-amber-700 text-sm mt-2">+ Add step</button>
+  </div>
+
+  <%= f.submit(@recipe.persisted? ? "Save Recipe" : "Add Recipe", class: "bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700") %>
+<% end %>

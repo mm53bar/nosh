@@ -1,0 +1,13 @@
+one:
+  name: Tofu
+  amount: "200"
+  unit: g
+  category: Fridge
+  checked: false
+
+two:
+  name: Black Beans
+  amount: "2"
+  unit: cup
+  category: Pantry & Dry Goods
+  checked: false

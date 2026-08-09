@@ -1,0 +1,7 @@
+one:
+  recipe: one
+  tag: vegetarian
+
+two:
+  recipe: two
+  tag: vegetarian

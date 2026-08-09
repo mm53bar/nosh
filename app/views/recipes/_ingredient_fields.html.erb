@@ -1,0 +1,8 @@
+<div class="flex gap-2 items-start" data-nested-fields-target="row">
+  <%= form.hidden_field :id %>
+  <%= form.text_field :amount, placeholder: "Amount", class: "border rounded-md px-2 py-1 w-20" %>
+  <%= form.text_field :unit, placeholder: "Unit", class: "border rounded-md px-2 py-1 w-24" %>
+  <%= form.text_field :name, placeholder: "Ingredient", class: "border rounded-md px-2 py-1 flex-1" %>
+  <%= form.hidden_field :_destroy %>
+  <button type="button" data-action="nested-fields#remove" class="text-red-600 px-2" aria-label="Remove ingredient">✕</button>
+</div>

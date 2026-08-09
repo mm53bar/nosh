@@ -1,0 +1,22 @@
+<% content_for :title, "Settings — nosh" %>
+
+<h1 class="text-2xl font-bold mb-6">Settings</h1>
+
+<%= form_with model: @setting, url: settings_path, method: :patch, class: "space-y-4 max-w-xl" do |f| %>
+  <% if @setting.errors.any? %>
+    <div class="bg-red-100 text-red-800 rounded-md px-4 py-3">
+      <%= @setting.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :flaresolverr_url, "FlareSolverr URL", class: "block font-medium" %>
+    <p class="text-sm text-stone-500 mb-1">
+      Optional — only needed for features that scrape recipe sites blocking plain requests (e.g. behind
+      Cloudflare). Leave blank to keep those features disabled.
+    </p>
+    <%= f.text_field :flaresolverr_url, placeholder: "http://192.168.0.140:8191/v1", class: "border rounded-md px-3 py-2 w-full" %>
+  </div>
+
+  <%= f.submit "Save", class: "bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700" %>
+<% end %>

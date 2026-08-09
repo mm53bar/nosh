@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Nosh" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Nosh">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-stone-50 text-stone-900">
+    <header class="bg-stone-900 text-stone-100">
+      <nav class="container mx-auto px-5 py-4 flex items-center gap-6">
+        <%= link_to "🍲 nosh", root_path, class: "text-lg font-semibold" %>
+        <%= link_to "Recipes", recipes_path, class: "hover:text-amber-300" %>
+        <%= link_to "Meal Plan", meal_plan_entries_path, class: "hover:text-amber-300" %>
+        <%= link_to "Shopping List", shopping_list_path, class: "hover:text-amber-300" %>
+        <%= link_to "Settings", settings_path, class: "ml-auto hover:text-amber-300" %>
+      </nav>
+    </header>
+
+    <main class="container mx-auto px-5 py-8">
+      <% flash.each do |type, message| %>
+        <div class="mb-4 rounded-md px-4 py-3 <%= type == "alert" ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800" %>">
+          <%= message %>
+        </div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+  </body>
+</html>
