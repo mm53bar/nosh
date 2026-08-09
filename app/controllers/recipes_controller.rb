@@ -55,7 +55,10 @@ class RecipesController < ApplicationController
 
   def destroy
     @recipe.destroy
-    redirect_to recipes_path, notice: "Recipe deleted."
+    respond_to do |format|
+      format.html { redirect_to recipes_path, notice: "Recipe deleted." }
+      format.json { head :no_content }
+    end
   end
 
   # Mirrors the old app's "mark as made today" action.
