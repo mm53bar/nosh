@@ -1,6 +1,9 @@
 <% content_for :title, "Recipes — nosh" %>
 
-<h1 class="text-2xl font-bold mb-6">Recipes</h1>
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold">Recipes</h1>
+  <%= link_to "RSS", recipes_path(format: :rss), class: "text-xs text-stone-400 hover:text-amber-700" %>
+</div>
 
 <%# The old app never had a manual "add recipe" button — recipes arrive via
     migration or LLM-driven discovery. This is the one add path in the UI:
@@ -13,36 +16,42 @@
 <% if @recipes.empty? %>
   <p class="text-stone-500">No recipes yet — paste a URL above to import one.</p>
 <% else %>
-  <div class="grid grid-cols-1 lg:grid-cols-[16rem_1fr] gap-8" data-controller="recipe-filter">
+  <div class="grid grid-cols-1 lg:grid-cols-[15rem_1fr] gap-8" data-controller="recipe-filter">
     <aside class="space-y-6">
-      <div class="relative">
-        <input type="search"
-               data-recipe-filter-target="input"
-               data-action="input->recipe-filter#search"
-               placeholder="Search recipes…"
-               autocomplete="off"
-               class="w-full pl-3 pr-8 py-2 text-sm rounded-md border border-stone-300 bg-white focus:border-amber-600 focus:ring-amber-600 focus:outline-none">
-        <button type="button"
-                data-action="recipe-filter#clear"
-                aria-label="Clear filters"
-                class="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 cursor-pointer">
-          ✕
-        </button>
-      </div>
+      <input type="search"
+             data-recipe-filter-target="input"
+             data-action="input->recipe-filter#search"
+             placeholder="Search recipes…"
+             autocomplete="off"
+             class="w-full px-3 py-2 text-sm rounded-md border border-stone-300 bg-white focus:border-amber-600 focus:ring-amber-600 focus:outline-none">
 
-      <% { "Cuisine" => [ "cuisine", @cuisines ], "Meal type" => [ "mealType", @meal_types ],
-           "Effort" => [ "effort", @efforts ], "Rating" => [ "rating", @ratings ] }.each do |label, (facet, values)| %>
+      <a href="#" data-action="recipe-filter#clear" data-recipe-filter-target="clearAll" hidden
+         class="block text-xs text-stone-400 hover:text-amber-700 cursor-pointer">✕ Clear filters</a>
+
+      <% [ [ "Type", "type", @meal_types ], [ "Effort", "effort", @efforts ],
+           [ "Rating", "rating", @ratings ], [ "Cuisine", "cuisine", @cuisines ] ].each do |label, facet, values| %>
         <% next if values.empty? %>
         <div>
-          <h2 class="text-sm font-semibold text-stone-700 mb-2"><%= label %></h2>
-          <div class="space-y-1">
-            <% values.each do |value| %>
-              <label class="flex items-center gap-2 text-sm text-stone-600 cursor-pointer">
-                <%= check_box_tag "#{facet}_#{value}", value, false,
-                      data: { recipe_filter_target: "facetCheckbox", facet: facet, action: "change->recipe-filter#filter" },
-                      class: "rounded border-stone-300 text-amber-600 focus:ring-amber-600" %>
-                <%= value == "unrated" ? "Unrated" : (facet == "rating" ? "#{value}★" : value) %>
-              </label>
+          <h2 class="text-xs font-bold uppercase tracking-wide text-stone-400 mb-2"><%= label %></h2>
+          <div class="space-y-0.5">
+            <a href="#" data-action="recipe-filter#select" data-recipe-filter-target="filterLink"
+               data-facet="<%= facet %>" data-value=""
+               class="block text-sm py-0.5 text-amber-700 font-semibold cursor-pointer">All</a>
+
+            <% values.each do |value, count| %>
+              <a href="#" data-action="recipe-filter#select" data-recipe-filter-target="filterLink"
+                 data-facet="<%= facet %>" data-value="<%= value %>"
+                 class="flex items-center gap-2 text-sm py-0.5 text-stone-600 hover:text-stone-900 cursor-pointer">
+                <% if facet == "effort" %>
+                  <%= effort_dot(value) %>
+                  <span><%= value %></span>
+                <% elsif facet == "rating" %>
+                  <span><%= rating_filter_label(value) %></span>
+                <% else %>
+                  <span><%= value %></span>
+                <% end %>
+                <span class="text-stone-300 text-xs ml-auto"><%= count %></span>
+              </a>
             <% end %>
           </div>
         </div>
@@ -50,9 +59,7 @@
     </aside>
 
     <div>
-      <p class="text-sm text-stone-500 mb-3">
-        <span data-recipe-filter-target="count"><%= @recipes.size %></span> recipes
-      </p>
+      <p class="text-sm text-stone-500 mb-3" data-recipe-filter-target="count"><%= @recipes.size %> recipes</p>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         <%= render partial: "card", collection: @recipes, as: :recipe %>

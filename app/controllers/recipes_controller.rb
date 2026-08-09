@@ -8,6 +8,7 @@ class RecipesController < ApplicationController
 
     respond_to do |format|
       format.html { load_facets }
+      format.rss { @recipes = @recipes.limit(50) }
       format.json do
         @recipes = @recipes.where("title LIKE ?", "%#{params[:search]}%") if params[:search].present?
         @recipes = @recipes.joins(:tags).where(tags: { name: params[:tag] }) if params[:tag].present?
@@ -114,14 +115,29 @@ class RecipesController < ApplicationController
 
   private
 
-  # Sidebar facet option lists — computed from the loaded set rather than a
-  # separate query, and kept in a fixed (not alphabetical) order for effort
-  # and rating so the sidebar reads Quick→Involved, 5★→1★→Unrated.
+  TYPE_ORDER = %w[Dinner Breakfast Drink Dessert Bread Sauce Snack].freeze
+  EFFORT_ORDER = %w[Quick Medium Involved].freeze
+
+  # Sidebar facet option lists (value, count) — computed from the loaded set
+  # rather than a separate query. Ordering mirrors the old app exactly: type
+  # follows a fixed meal-order with any extras alphabetized after; effort is
+  # Quick→Involved; rating is "and up" thresholds (5/4/3) plus Unrated, not
+  # every individual star count; cuisine is most-common first.
   def load_facets
-    @cuisines = @recipes.filter_map(&:cuisine).uniq.sort
-    @meal_types = @recipes.filter_map(&:meal_type).uniq.sort
-    @efforts = %w[Quick Medium Involved] & @recipes.filter_map { |r| helpers.recipe_effort(r) }.uniq
-    @ratings = %w[5 4 3 2 1 unrated] & @recipes.map { |r| (r.rating || "unrated").to_s }.uniq
+    type_counts = @recipes.each_with_object(Hash.new(0)) { |r, h| h[r.meal_type] += 1 if r.meal_type.present? }
+    ordered_types = TYPE_ORDER & type_counts.keys
+    @meal_types = (ordered_types + (type_counts.keys - TYPE_ORDER).sort).map { |t| [ t, type_counts[t] ] }
+
+    effort_counts = @recipes.each_with_object(Hash.new(0)) { |r, h| e = helpers.recipe_effort(r); h[e] += 1 if e }
+    @efforts = EFFORT_ORDER.filter_map { |e| [ e, effort_counts[e] ] if effort_counts[e].positive? }
+
+    and_up = ->(min) { @recipes.count { |r| r.rating && r.rating >= min } }
+    unrated_count = @recipes.count { |r| r.rating.nil? }
+    @ratings = [ [ "5", and_up.call(5) ], [ "4", and_up.call(4) ], [ "3", and_up.call(3) ] ]
+      .select { |_, count| count.positive? } + (unrated_count.positive? ? [ [ "unrated", unrated_count ] ] : [])
+
+    cuisine_counts = @recipes.each_with_object(Hash.new(0)) { |r, h| h[r.cuisine] += 1 if r.cuisine.present? }
+    @cuisines = cuisine_counts.sort_by { |name, count| [ -count, name ] }
   end
 
   def set_recipe

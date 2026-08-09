@@ -4,7 +4,14 @@ class RecipesControllerTest < ActionDispatch::IntegrationTest
   test "index renders with sidebar facet options computed from the loaded recipes" do
     get recipes_path
     assert_response :success
-    assert_select "input[data-facet='cuisine'][value=?]", recipes(:one).cuisine
+    assert_select "a[data-facet='cuisine'][data-value=?]", recipes(:one).cuisine
+  end
+
+  test "cuisine facet excludes blank strings, not just nil" do
+    recipes(:two).update!(cuisine: "")
+
+    get recipes_path
+    assert_select "a[data-facet='cuisine'][data-value='']", count: 1 # only the "All" link
   end
 
   test "index.json still supports query-param filtering for API consumers" do
@@ -19,5 +26,14 @@ class RecipesControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to recipes_path
     assert_equal "Invalid URL — must be http:// or https://", flash[:alert]
+  end
+
+  test "index.rss renders a valid feed with the recipes' titles and links" do
+    get recipes_path(format: :rss)
+
+    assert_response :success
+    assert_equal "application/rss+xml", response.media_type
+    assert_includes response.body, recipes(:one).title
+    assert_includes response.body, recipe_url(recipes(:one))
   end
 end

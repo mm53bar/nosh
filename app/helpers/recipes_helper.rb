@@ -35,6 +35,33 @@ module RecipesHelper
     label || "Involved"
   end
 
+  # Same colors as the old app's .effort-dot CSS (green/orange/red).
+  EFFORT_COLORS = { "Quick" => "#27ae60", "Medium" => "#e67e22", "Involved" => "#c0392b" }.freeze
+
+  def effort_dot(effort_label)
+    return nil if effort_label.blank?
+
+    tag.span("", class: "inline-block w-2.5 h-2.5 rounded-full shrink-0",
+      style: "background-color: #{EFFORT_COLORS.fetch(effort_label, '#bbb')}")
+  end
+
+  # Filled + dimmed-empty stars, matching the old app's stars() helper
+  # (e.g. rating 3 → "★★★" in amber, "★★" in a dim gray).
+  def recipe_stars(rating)
+    return tag.span("Unrated", class: "text-stone-400 text-xs italic") if rating.nil?
+
+    tag.span(class: "text-amber-500 tracking-tight") do
+      safe_join([ "★" * rating, tag.span("★" * (5 - rating), class: "text-stone-300") ])
+    end
+  end
+
+  def rating_filter_label(value)
+    return "Unrated" if value == "unrated"
+    return "★★★★★ only" if value == "5"
+
+    "#{"★" * value.to_i}+ and up"
+  end
+
   private
 
   def iso8601_minutes(minutes)

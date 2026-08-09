@@ -1,14 +1,15 @@
 <%# Locals: recipe (required)
     Rails Blocks "Card with Featured Image" (railsblocks.com/docs/card), retinted from its
     default blue/neutral to nosh's existing stone/amber palette to match blip/tsundoku.
-    data-* attributes are read by recipe_filter_controller.js for client-side filtering. %>
+    data-* attributes are read by recipe_filter_controller.js for client-side filtering —
+    facet keys (type/effort/rating/cuisine) match the sidebar links' data-facet values. %>
 <%= link_to recipe,
       class: "group block bg-white rounded-xl overflow-hidden border border-black/10 shadow-xs hover:shadow-md transition-shadow",
       data: {
         recipe_filter_target: "card",
         searchable: recipe.title.downcase,
         cuisine: recipe.cuisine,
-        meal_type: recipe.meal_type,
+        type: recipe.meal_type,
         effort: recipe_effort(recipe),
         rating: recipe.rating || "unrated"
       } do %>
@@ -21,20 +22,19 @@
   </div>
   <div class="px-4 py-3">
     <div class="flex items-center gap-2 mb-1">
-      <% if recipe.cuisine.present? %>
+      <% if recipe.meal_type.present? %>
         <span class="inline-flex items-center rounded-md bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-700 outline outline-amber-600/20">
-          <%= recipe.cuisine %>
+          <%= recipe.meal_type %>
         </span>
       <% end %>
-      <% if recipe.meal_type.present? %>
-        <span class="text-xs text-stone-500"><%= recipe.meal_type %></span>
+      <% if recipe.cuisine.present? %>
+        <span class="text-xs text-stone-500"><%= recipe.cuisine %></span>
       <% end %>
+      <%= effort_dot(recipe_effort(recipe)) %>
     </div>
     <h3 class="text-lg font-semibold text-stone-900 leading-snug line-clamp-2 group-hover:text-amber-700">
       <%= recipe.title %>
     </h3>
-    <% if recipe.rating %>
-      <p class="text-amber-500 text-sm mt-1"><%= "★" * recipe.rating %></p>
-    <% end %>
+    <p class="mt-1"><%= recipe_stars(recipe.rating) %></p>
   </div>
 <% end %>
