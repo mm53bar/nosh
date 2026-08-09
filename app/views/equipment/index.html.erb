@@ -1,0 +1,21 @@
+<% content_for :title, "Equipment — nosh" %>
+
+<h1 class="text-2xl font-bold mb-6">Equipment</h1>
+
+<% if @equipment.empty? %>
+  <p class="text-stone-500">No equipment yet — add some from a recipe or technique's edit form.</p>
+<% else %>
+  <ul class="max-w-md space-y-1">
+    <% @equipment.each do |equipment| %>
+      <li class="flex items-center justify-between border-b border-stone-100 py-2">
+        <span class="<%= "text-stone-400" unless equipment.owned %>"><%= equipment.name %></span>
+        <%= form_with model: equipment, url: equipment_path(equipment), method: :patch, data: { controller: "auto-submit" } do |f| %>
+          <label class="flex items-center gap-2 text-sm text-stone-500 cursor-pointer">
+            Owned
+            <%= f.check_box :owned, data: { action: "change->auto-submit#submit" } %>
+          </label>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>

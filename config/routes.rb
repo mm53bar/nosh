@@ -15,6 +15,9 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :techniques
+  resources :equipment, only: [ :index, :update ]
+
   resources :meal_plan_entries, only: [ :index, :create, :destroy ]
 
   resource :shopping_list, only: [ :show, :destroy ] do

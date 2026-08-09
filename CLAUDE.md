@@ -44,6 +44,12 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   automation layer's job (`recipe-discovery.py`), not this app's — there's nothing in nosh that
   needs FlareSolverr or similar, so don't add operator-settings infrastructure ahead of an actual
   need. See `docs/adr/20260809-no-settings-recipe-discovery-is-nanoclaws-job.md`.
+- `Equipment` (name + owned, seeded from the household's real kitchen in `db/seeds.rb`) and
+  `Technique` (title + body, freeform reference/technique content — not shaped like a Recipe) are
+  real models, not tags. Equipment is create-on-the-fly by name (`HasEquipment` concern, shared by
+  Recipe and Technique); Techniques are only ever linked to a recipe by picking an existing one
+  (`technique_ids`) — never create-on-the-fly, since a stub with no `body` is worthless. See
+  `docs/adr/20260809-equipment-and-technique-models.md`.
 - Secrets are a plain **env var** (`SECRET_KEY_BASE`) — this repo is public, so
   `config/credentials.yml.enc` is git-ignored and never committed; env is the blessed source,
   Rails encrypted credentials remain an optional escape hatch. See

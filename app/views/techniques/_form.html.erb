@@ -1,0 +1,26 @@
+<%= form_with model: @technique, class: "space-y-6 max-w-2xl" do |f| %>
+  <% if @technique.errors.any? %>
+    <div class="bg-red-100 text-red-800 rounded-md px-4 py-3">
+      <ul class="list-disc list-inside">
+        <% @technique.errors.full_messages.each do |message| %><li><%= message %></li><% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :title, class: "block font-medium" %>
+    <%= f.text_field :title, class: "border rounded-md px-3 py-2 w-full" %>
+  </div>
+
+  <div>
+    <%= f.label :body, "Instructions / tips", class: "block font-medium" %>
+    <%= f.text_area :body, rows: 8, class: "border rounded-md px-3 py-2 w-full" %>
+  </div>
+
+  <div>
+    <%= f.label :equipment_names_text, "Equipment (comma-separated)", class: "block font-medium" %>
+    <%= f.text_field :equipment_names_text, class: "border rounded-md px-3 py-2 w-full" %>
+  </div>
+
+  <%= f.submit(@technique.persisted? ? "Save Technique" : "Add Technique", class: "bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700") %>
+<% end %>

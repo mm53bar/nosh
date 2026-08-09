@@ -90,10 +90,28 @@ no public exposure (see `docs/adr/20260809-no-auth-needed.md`).
     against a real recipe (re-imported one of nosh's own live pages end-to-end). hRecipe support
     deliberately skipped — dead format, not worth the parser.
 
-## Phase 2 — Not yet built
+## Phase 2 — Sidebar rework, Equipment/Technique, wake lock — DONE
 
-- **PWA shell** (manifest + service worker) and the recipe-detail Wake Lock "keep screen on while
-  cooking" toggle — both present in the old app, not yet ported.
+- **Sidebar rebuilt from the old app's actual source** (checkboxes → single-select click-to-filter
+  links per group, colored effort dots, real star glyphs, "N and up" rating thresholds) after
+  feedback that the first pass didn't match. Two real bugs found and fixed in the process: the
+  Cuisine facet showed a blank entry (`filter_map` doesn't drop empty strings, only nil/false —
+  some migrated recipes have `cuisine: ""`), and the list sorted oldest-first because the migration
+  script preserved the old app's own (newest-first) listing order as insertion order, inverting
+  chronology. Backfilled `created_at` from the old app's real timestamps
+  (`reference-scripts/backfill-created-at-2026-08-09.rb`).
+- **RSS feed** (`GET /recipes.rss`) added, discoverable via `<link rel="alternate">`.
+- **`Equipment` and `Technique` models** — see `docs/adr/20260809-equipment-and-technique-models.md`
+  for the full reasoning (surveyed Mealie/Tandoor first; neither models technique content, so this
+  rests on this household's stated need, not precedent). Equipment seeded from the household's real
+  kitchen (`db/seeds.rb`); 4 equipment-shaped tags and 9 mis-categorized recipes reclassified via
+  `reference-scripts/reclassify-equipment-and-techniques-2026-08-09.rb`.
+- **Wake Lock toggle** ("Keep awake" while cooking) ported from the old app's exact behavior —
+  hides entirely if the browser has no Wake Lock API, re-acquires on visibility change.
+
+## Phase 3 — Not yet built
+
+- **PWA shell** (manifest + service worker) — present in the old app, not yet ported.
 - **Raw image upload UI polish** — the backend already accepts `image` as a multipart param on
   create/update (Active Storage handles it natively); the HTML form has a plain file field but no
   drag-and-drop or preview.

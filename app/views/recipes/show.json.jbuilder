@@ -12,6 +12,8 @@ json.rating @recipe.rating
 json.last_made_on @recipe.last_made_on
 json.image_url(@recipe.image.attached? ? url_for(@recipe.image) : nil)
 json.tags @recipe.tag_names
+json.equipment @recipe.equipment_names
+json.techniques @recipe.techniques.map { |t| { id: t.id, title: t.title } }
 json.ingredients @recipe.ingredients do |ingredient|
   json.id ingredient.id
   json.amount ingredient.amount

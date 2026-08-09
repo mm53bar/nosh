@@ -29,7 +29,8 @@
          class="block text-xs text-stone-400 hover:text-amber-700 cursor-pointer">✕ Clear filters</a>
 
       <% [ [ "Type", "type", @meal_types ], [ "Effort", "effort", @efforts ],
-           [ "Rating", "rating", @ratings ], [ "Cuisine", "cuisine", @cuisines ] ].each do |label, facet, values| %>
+           [ "Rating", "rating", @ratings ], [ "Cuisine", "cuisine", @cuisines ],
+           [ "Equipment", "equipment", @equipment_list ] ].each do |label, facet, values| %>
         <% next if values.empty? %>
         <div>
           <h2 class="text-xs font-bold uppercase tracking-wide text-stone-400 mb-2"><%= label %></h2>

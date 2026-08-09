@@ -11,7 +11,8 @@
         cuisine: recipe.cuisine,
         type: recipe.meal_type,
         effort: recipe_effort(recipe),
-        rating: recipe.rating || "unrated"
+        rating: recipe.rating || "unrated",
+        equipment: recipe.equipment.map(&:name).join("|")
       } do %>
   <div class="aspect-video bg-stone-200 overflow-hidden">
     <% if recipe.image.attached? %>

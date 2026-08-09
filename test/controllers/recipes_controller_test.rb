@@ -36,4 +36,22 @@ class RecipesControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, recipes(:one).title
     assert_includes response.body, recipe_url(recipes(:one))
   end
+
+  test "update accepts equipment_names_text and technique_ids" do
+    recipe = recipes(:one)
+    patch recipe_path(recipe), params: {
+      recipe: { equipment_names_text: "Instant Pot, Stand mixer", technique_ids: [ techniques(:basic_vinaigrette).id ] }
+    }
+
+    recipe.reload
+    assert_equal [ "Instant Pot", "Stand mixer" ], recipe.equipment_names.sort
+    assert_equal [ techniques(:basic_vinaigrette) ], recipe.techniques
+  end
+
+  test "index sidebar includes an Equipment facet" do
+    recipes(:one).equipment_names = [ "Instant Pot" ]
+
+    get recipes_path
+    assert_select "a[data-facet='equipment'][data-value='Instant Pot']"
+  end
 end

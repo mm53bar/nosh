@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_09_212824) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_09_232254) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -39,6 +39,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_09_212824) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "equipment", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.boolean "owned", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_equipment_on_name", unique: true
+  end
+
   create_table "ingredients", force: :cascade do |t|
     t.string "amount"
     t.datetime "created_at", null: false
@@ -62,6 +70,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_09_212824) do
     t.index ["recipe_id"], name: "index_meal_plan_entries_on_recipe_id"
   end
 
+  create_table "recipe_equipments", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "equipment_id", null: false
+    t.integer "recipe_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["equipment_id"], name: "index_recipe_equipments_on_equipment_id"
+    t.index ["recipe_id", "equipment_id"], name: "index_recipe_equipments_on_recipe_id_and_equipment_id", unique: true
+    t.index ["recipe_id"], name: "index_recipe_equipments_on_recipe_id"
+  end
+
   create_table "recipe_tags", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "recipe_id", null: false
@@ -70,6 +88,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_09_212824) do
     t.index ["recipe_id", "tag_id"], name: "index_recipe_tags_on_recipe_id_and_tag_id", unique: true
     t.index ["recipe_id"], name: "index_recipe_tags_on_recipe_id"
     t.index ["tag_id"], name: "index_recipe_tags_on_tag_id"
+  end
+
+  create_table "recipe_techniques", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "recipe_id", null: false
+    t.integer "technique_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["recipe_id", "technique_id"], name: "index_recipe_techniques_on_recipe_id_and_technique_id", unique: true
+    t.index ["recipe_id"], name: "index_recipe_techniques_on_recipe_id"
+    t.index ["technique_id"], name: "index_recipe_techniques_on_technique_id"
   end
 
   create_table "recipes", force: :cascade do |t|
@@ -115,11 +143,35 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_09_212824) do
     t.index ["name"], name: "index_tags_on_name", unique: true
   end
 
+  create_table "technique_equipments", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "equipment_id", null: false
+    t.integer "technique_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["equipment_id"], name: "index_technique_equipments_on_equipment_id"
+    t.index ["technique_id", "equipment_id"], name: "index_technique_equipments_on_technique_id_and_equipment_id", unique: true
+    t.index ["technique_id"], name: "index_technique_equipments_on_technique_id"
+  end
+
+  create_table "techniques", force: :cascade do |t|
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["title"], name: "index_techniques_on_title", unique: true
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "ingredients", "recipes"
   add_foreign_key "meal_plan_entries", "recipes"
+  add_foreign_key "recipe_equipments", "equipment"
+  add_foreign_key "recipe_equipments", "recipes"
   add_foreign_key "recipe_tags", "recipes"
   add_foreign_key "recipe_tags", "tags"
+  add_foreign_key "recipe_techniques", "recipes"
+  add_foreign_key "recipe_techniques", "techniques"
   add_foreign_key "steps", "recipes"
+  add_foreign_key "technique_equipments", "equipment"
+  add_foreign_key "technique_equipments", "techniques"
 end

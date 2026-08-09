@@ -22,6 +22,13 @@ class RecipeTest < ActiveSupport::TestCase
     assert Tag.exists?(name: "new-tag")
   end
 
+  test "equipment_names= resolves existing equipment and creates new ones" do
+    recipe = recipes(:one)
+    recipe.equipment_names = [ "Instant Pot", "Stand mixer" ]
+    assert_equal [ "Instant Pot", "Stand mixer" ], recipe.equipment_names.sort
+    assert Equipment.exists?(name: "Stand mixer")
+  end
+
   test "planned_since finds recipes with a meal-plan entry on or after the date" do
     assert_includes Recipe.planned_since(Date.new(2026, 8, 1)), recipes(:one)
     assert_not_includes Recipe.planned_since(Date.new(2026, 8, 12)), recipes(:one)

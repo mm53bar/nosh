@@ -1,0 +1,30 @@
+<% content_for :title, "#{@technique.title} — nosh" %>
+
+<div class="max-w-2xl">
+  <div class="flex items-start justify-between">
+    <h1 class="text-2xl font-bold"><%= @technique.title %></h1>
+    <div class="flex gap-2">
+      <%= link_to "Edit", edit_technique_path(@technique), class: "border rounded-md px-3 py-1.5 hover:bg-stone-100" %>
+      <%= button_to "Delete", technique_path(@technique), method: :delete, data: { turbo_confirm: "Delete this technique?" }, class: "border rounded-md px-3 py-1.5 hover:bg-red-50 text-red-700" %>
+    </div>
+  </div>
+
+  <% if @technique.equipment.any? %>
+    <div class="mt-2 flex gap-2 flex-wrap">
+      <% @technique.equipment.each do |equipment| %>
+        <span class="bg-stone-200 text-stone-700 text-sm px-2 py-1 rounded-full"><%= equipment.name %></span>
+      <% end %>
+    </div>
+  <% end %>
+
+  <p class="mt-4 text-stone-700 whitespace-pre-line"><%= @technique.body %></p>
+
+  <% if @technique.recipes.any? %>
+    <h2 class="text-lg font-semibold mt-6">Used in</h2>
+    <ul class="mt-2 space-y-1">
+      <% @technique.recipes.each do |recipe| %>
+        <li><%= link_to recipe.title, recipe, class: "text-amber-700 hover:underline" %></li>
+      <% end %>
+    </ul>
+  <% end %>
+</div>

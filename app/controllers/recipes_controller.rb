@@ -4,7 +4,7 @@ class RecipesController < ApplicationController
   before_action :set_recipe, only: [ :show, :edit, :update, :destroy, :made, :image ]
 
   def index
-    @recipes = Recipe.includes(:tags, image_attachment: :blob).order(created_at: :desc)
+    @recipes = Recipe.includes(:tags, :equipment, image_attachment: :blob).order(created_at: :desc)
 
     respond_to do |format|
       format.html { load_facets }
@@ -138,6 +138,9 @@ class RecipesController < ApplicationController
 
     cuisine_counts = @recipes.each_with_object(Hash.new(0)) { |r, h| h[r.cuisine] += 1 if r.cuisine.present? }
     @cuisines = cuisine_counts.sort_by { |name, count| [ -count, name ] }
+
+    equipment_counts = @recipes.each_with_object(Hash.new(0)) { |r, h| r.equipment.each { |e| h[e.name] += 1 } }
+    @equipment_list = equipment_counts.sort_by { |name, count| [ -count, name ] }
   end
 
   def set_recipe
@@ -148,7 +151,8 @@ class RecipesController < ApplicationController
     params.require(:recipe).permit(
       :title, :source_url, :description, :servings, :cuisine, :meal_type,
       :prep_time_minutes, :total_time_minutes, :notes, :rating, :last_made_on, :image,
-      :tag_names_text, tag_names: [],
+      :tag_names_text, :equipment_names_text,
+      tag_names: [], equipment_names: [], technique_ids: [],
       ingredients_attributes: [ :id, :amount, :unit, :name, :position, :_destroy ],
       steps_attributes: [ :id, :instruction, :position, :_destroy ]
     )

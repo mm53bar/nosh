@@ -1,0 +1,7 @@
+cast_iron_pan:
+  name: Cast iron pan
+  owned: true
+
+instant_pot:
+  name: Instant Pot
+  owned: true

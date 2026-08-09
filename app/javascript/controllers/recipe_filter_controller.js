@@ -57,6 +57,7 @@ export default class extends Controller {
       const matchesFacets = Object.entries(this.state).every(([facet, value]) => {
         if (!value) return true
         if (facet === "rating") return this.matchesRating(card, value)
+        if (facet === "equipment") return (card.dataset.equipment || "").split("|").includes(value)
         return (card.dataset[facet] || "") === value
       })
       const visible = matchesSearch && matchesFacets

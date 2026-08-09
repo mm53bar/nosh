@@ -64,6 +64,26 @@
     <%= f.text_field :tag_names_text, class: "border rounded-md px-3 py-2 w-full" %>
   </div>
 
+  <div>
+    <%= f.label :equipment_names_text, "Equipment (comma-separated)", class: "block font-medium" %>
+    <%= f.text_field :equipment_names_text, class: "border rounded-md px-3 py-2 w-full" %>
+  </div>
+
+  <% if Technique.any? %>
+    <div>
+      <span class="block font-medium mb-1">Related techniques</span>
+      <div class="space-y-1">
+        <% Technique.order(:title).each do |technique| %>
+          <label class="flex items-center gap-2 text-sm text-stone-600">
+            <%= check_box_tag "recipe[technique_ids][]", technique.id, @recipe.technique_ids.include?(technique.id),
+                  id: "recipe_technique_ids_#{technique.id}" %>
+            <%= technique.title %>
+          </label>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
   <div data-controller="nested-fields">
     <h2 class="font-medium">Ingredients</h2>
     <div data-nested-fields-target="rows" class="space-y-2 mt-2">

@@ -1,10 +1,16 @@
 class Recipe < ApplicationRecord
+  include HasEquipment
+
   has_one_attached :image
 
   has_many :ingredients, -> { order(:position) }, dependent: :destroy, inverse_of: :recipe
   has_many :steps, -> { order(:position) }, dependent: :destroy, inverse_of: :recipe
   has_many :recipe_tags, dependent: :destroy
   has_many :tags, through: :recipe_tags
+  has_many :recipe_equipments, dependent: :destroy
+  has_many :equipment, through: :recipe_equipments
+  has_many :recipe_techniques, dependent: :destroy
+  has_many :techniques, through: :recipe_techniques
   has_many :meal_plan_entries, dependent: :destroy
 
   accepts_nested_attributes_for :ingredients, :steps, allow_destroy: true
