@@ -1,11 +1,11 @@
 {
   "ignored_warnings": [
     {
-      "fingerprint": "1b76605338fa23228a90222482ec33257cd6f0589b10f3e92472555a043ad59d",
+      "fingerprint": "b1bb16ee83279e76996e8edeffe7d91ce0f14d43049e92fa9afafcd7266f6dfd",
       "check_name": "LinkToHref",
       "message": "Potentially unsafe model attribute in `link_to` href",
       "file": "app/views/recipes/show.html.erb",
-      "line": 19,
+      "line": 64,
       "note": "Recipe#source_url has a model validation (format: %r{\\Ahttps?://\\S+\\z}i) rejecting any non-http(s) scheme, so javascript:/data: URLs can never be saved. Belt-and-suspenders would be a render-time re-check, but the validation alone already closes the vector Brakeman is flagging."
     }
   ],

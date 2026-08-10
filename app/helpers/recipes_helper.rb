@@ -62,6 +62,15 @@ module RecipesHelper
     "#{"★" * value.to_i}+ and up"
   end
 
+  # "25m" / "1h" / "1h 30m" — matches the old app's formatTime() exactly.
+  def format_minutes(minutes)
+    return nil if minutes.blank?
+    return "#{minutes}m" if minutes < 60
+
+    hours, remainder = minutes.divmod(60)
+    remainder.positive? ? "#{hours}h #{remainder}m" : "#{hours}h"
+  end
+
   private
 
   def iso8601_minutes(minutes)

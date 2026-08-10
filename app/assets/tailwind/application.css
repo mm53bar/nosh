@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+/* Recipe step tracking (tap-to-track cooking progress) — compound
+   active/done states are simpler as a few plain CSS rules than forcing
+   them through Tailwind's arbitrary variants for a two-state component. */
+.step.active {
+  background-color: theme("colors.amber.50");
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+.step.active .step-num {
+  opacity: 1;
+}
+.step.active .step-text {
+  font-weight: 500;
+}
+.step.done .step-num {
+  opacity: 0.2;
+  text-decoration: line-through;
+}
+.step.done .step-text {
+  color: theme("colors.stone.400");
+}
