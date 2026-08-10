@@ -1,0 +1,15 @@
+<%# Inserted into the Rails Blocks navbar as the "More" dropdown content —
+    everything that doesn't need top-level nav billing: the URL import (now
+    reachable from anywhere, not just the recipe list) plus the secondary
+    pages. %>
+<div class="text-sm">
+  <div class="px-3 py-2 border-b border-stone-200">
+    <%= form_with url: import_recipes_path, method: :post, class: "flex gap-2" do |f| %>
+      <%= f.url_field :url, placeholder: "Import from URL…", required: true, class: "border rounded-md px-2 py-1.5 text-sm flex-1 min-w-0" %>
+      <%= f.submit "Go", class: "bg-amber-600 text-white px-3 py-1.5 rounded-md hover:bg-amber-700 text-sm shrink-0" %>
+    <% end %>
+  </div>
+  <%= link_to "Shopping List", shopping_list_path, class: "block w-full text-left px-3 py-2 text-stone-700 hover:bg-stone-50" %>
+  <%= link_to "Techniques", techniques_path, class: "block w-full text-left px-3 py-2 text-stone-700 hover:bg-stone-50" %>
+  <%= link_to "Equipment", equipment_index_path, class: "block w-full text-left px-3 py-2 text-stone-700 hover:bg-stone-50" %>
+</div>

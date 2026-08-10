@@ -5,16 +5,8 @@
   <%= link_to "RSS", recipes_path(format: :rss), class: "text-xs text-stone-400 hover:text-amber-700" %>
 </div>
 
-<%# The old app never had a manual "add recipe" button — recipes arrive via
-    migration or LLM-driven discovery. This is the one add path in the UI:
-    paste a source URL and RecipeImporter reads its schema.org/Recipe JSON-LD. %>
-<%= form_with url: import_recipes_path, method: :post, class: "mb-6 flex gap-3" do |f| %>
-  <%= f.url_field :url, placeholder: "Paste a recipe URL to import…", required: true, class: "border rounded-md px-3 py-2 flex-1" %>
-  <%= f.submit "Import", class: "bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700" %>
-<% end %>
-
 <% if @recipes.empty? %>
-  <p class="text-stone-500">No recipes yet — paste a URL above to import one.</p>
+  <p class="text-stone-500">No recipes yet — use "More" in the nav above to import one from a URL.</p>
 <% else %>
   <div class="grid grid-cols-1 lg:grid-cols-[15rem_1fr] gap-8" data-controller="recipe-filter">
     <aside class="space-y-6">

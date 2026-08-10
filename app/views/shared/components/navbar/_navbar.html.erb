@@ -1,14 +1,13 @@
 <%# Rails Blocks navbar (railsblocks.com), retinted from neutral/blue to nosh's
-    stone/amber palette to match blip/tsundoku. The dropdown/mobile-hamburger
-    interaction logic (navbar_controller.js in the original component) is
-    deliberately NOT copied in — nosh has no dropdown nav items and no items
-    array long enough to need a mobile hamburger, so that ~1000 lines of
-    open/close/positioning JS would be pure unused scaffolding. If a dropdown
-    is ever actually needed, pull navbar_controller.js in at that point. %>
+    stone/amber palette. Mobile-hamburger support deliberately dropped — every
+    navbar instance here holds at most a couple of flat items plus one dropdown,
+    which fits fine without one; if that changes, port show_mobile_menu back in
+    from tsundoku's copy of this component. %>
 <% items ||= [] %>
 <% variant ||= "default" %>
 <% classes ||= nil %>
 <% logo ||= nil %>
+<% dropdown_contents ||= [] %>
 
 <%
   base_nav = "flex w-fit justify-center"
@@ -24,15 +23,36 @@
   menu_classes = [ base_menu, variant_menu ].join(" ")
 %>
 
-<nav class="<%= nav_classes %>">
-  <ul class="<%= menu_classes %>">
-    <% if logo.present? %>
-      <li><%= logo.html_safe %></li>
-    <% end %>
+<nav class="<%= nav_classes %>" data-controller="navbar">
+  <div class="relative">
+    <ul data-navbar-target="menu" class="<%= menu_classes %>">
+      <% if logo.present? %>
+        <li><%= logo.html_safe %></li>
+      <% end %>
 
-    <% items.each do |item| %>
-      <%= render "shared/components/navbar/navbar_item",
-            label: item[:label], href: item[:href], active: item[:active] || false %>
-    <% end %>
-  </ul>
+      <% items.each_with_index do |item, index| %>
+        <%= render "shared/components/navbar/navbar_item",
+              label: item[:label], href: item[:href], active: item[:active] || false,
+              dropdown: item[:dropdown] || false, content_id: item[:content_id],
+              align: item[:align] || "center", unique_id: "navbar-#{object_id}-#{index}" %>
+      <% end %>
+    </ul>
+
+    <div data-navbar-target="viewport"
+         data-action="pointerenter->navbar#cancelClose pointerleave->navbar#handlePointerLeave"
+         data-state="closed"
+         class="absolute top-full z-50 mt-2 origin-top transition-all duration-200 ease-out data-[state=closed]:pointer-events-none data-[state=closed]:scale-95 data-[state=closed]:opacity-0 data-[state=closing]:pointer-events-none data-[state=closing]:scale-95 data-[state=closing]:opacity-0 data-[state=open]:pointer-events-auto data-[state=open]:scale-100 data-[state=open]:opacity-100 left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0">
+      <div data-navbar-target="indicator" class="pointer-events-none absolute -top-1 z-10 flex h-2 w-10 items-end justify-center overflow-visible transition-opacity duration-200">
+        <div class="h-2 w-2 rotate-45 border-t border-l border-stone-200 bg-white"></div>
+      </div>
+
+      <div data-navbar-target="background" class="relative z-0 rounded-lg border border-stone-200 bg-white shadow-xl">
+        <% dropdown_contents.each do |dropdown| %>
+          <%= render "shared/components/navbar/navbar_dropdown_content",
+                id: dropdown[:id], width: dropdown[:width], columns: dropdown[:columns] || 1,
+                content_classes: dropdown[:classes], content: dropdown[:content] %>
+        <% end %>
+      </div>
+    </div>
+  </div>
 </nav>

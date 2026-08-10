@@ -26,17 +26,24 @@
 
   <body class="bg-stone-50 text-stone-900 min-h-screen">
     <header class="border-b border-stone-200 bg-white">
-      <div class="container mx-auto px-5 py-4 flex items-center gap-6">
-        <%= link_to root_path, class: "text-lg font-semibold" do %>
-          🍲 nosh
-        <% end %>
+      <div class="container mx-auto px-5 py-4 flex items-center justify-between gap-6">
+        <div class="flex items-center gap-6">
+          <%= link_to root_path, class: "text-lg font-semibold" do %>
+            🍲 nosh
+          <% end %>
+          <%= render "shared/components/navbar/navbar",
+                variant: "transparent",
+                items: [
+                  { label: "Recipes", href: recipes_path, active: controller_name == "recipes" },
+                  { label: "Meal Plan", href: meal_plan_entries_path, active: controller_name == "meal_plan_entries" }
+                ] %>
+        </div>
+
         <%= render "shared/components/navbar/navbar",
               variant: "transparent",
-              items: [
-                { label: "Recipes", href: recipes_path, active: controller_name == "recipes" },
-                { label: "Meal Plan", href: meal_plan_entries_path, active: controller_name == "meal_plan_entries" },
-                { label: "Shopping List", href: shopping_list_path, active: controller_name == "shopping_lists" },
-                { label: "Techniques", href: techniques_path, active: controller_name == "techniques" }
+              items: [ { label: "More", dropdown: true, content_id: "more-menu", align: "end" } ],
+              dropdown_contents: [
+                { id: "more-menu", width: "w-64", content: capture { render "layouts/more_menu_content" } }
               ] %>
       </div>
     </header>
