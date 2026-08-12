@@ -27,5 +27,16 @@ Rails.application.routes.draw do
     collection { patch :bulk_update }
   end
 
+  # The kitchen wall screen (a Home Assistant dashboard framing nosh on an Echo
+  # Show). Read-mostly and self-contained — deliberately not the main /recipes
+  # UI, whose type scale and edit/import affordances are wrong at counter
+  # distance. See docs/adr/20260812-framed-by-home-assistant.md.
+  namespace :kitchen do
+    root "meals#index"
+    resources :recipes, only: [ :show ] do
+      member { post :made }
+    end
+  end
+
   get "/stats", to: "stats#show"
 end

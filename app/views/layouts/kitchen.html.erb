@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Kitchen — nosh" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csp_meta_tag %>
+
+    <%# No csrf_meta_tags: the kiosk frames nosh from a different site, so no
+        session cookie arrives and a token here would be a token that can't
+        validate. The one write on this screen goes over JSON instead. %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <%# h-dvh + overflow-hidden: inside the Home Assistant iframe the viewport is
+      a fixed box, and the whole point of this screen is that ingredients and
+      steps stay on it at once. Panes scroll individually; the page never does. %>
+  <body class="bg-stone-50 text-stone-900 h-dvh overflow-hidden text-[19px] antialiased">
+    <%= yield %>
+  </body>
+</html>

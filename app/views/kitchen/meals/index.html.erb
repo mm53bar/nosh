@@ -1,0 +1,34 @@
+<% content_for :title, "Kitchen — nosh" %>
+
+<div class="h-full flex flex-col">
+  <header class="shrink-0 px-8 pt-6 pb-4 flex items-end justify-between gap-6">
+    <div>
+      <% if @entries.any? %>
+        <h1 class="text-4xl font-bold">This week</h1>
+        <p class="text-lg text-stone-500 mt-1">
+          <%= @start_date.strftime("%b %-d") %> – <%= @end_date.strftime("%b %-d") %>
+        </p>
+      <% else %>
+        <h1 class="text-4xl font-bold">Nothing planned</h1>
+        <%# Labelled as suggestions, not dressed up as a plan — an empty week is
+            the normal state here, and the screen shouldn't imply otherwise. %>
+        <p class="text-lg text-stone-500 mt-1">Suggestions: dinners you haven't cooked yet</p>
+      <% end %>
+    </div>
+    <p class="text-lg text-stone-400"><%= Date.current.strftime("%A") %></p>
+  </header>
+
+  <div class="flex-1 overflow-y-auto px-8 pb-8">
+    <div class="grid grid-cols-3 gap-6">
+      <% if @entries.any? %>
+        <% @entries.each do |entry| %>
+          <%= render "kitchen/recipe_card", recipe: entry.recipe, label: entry.date.strftime("%A") %>
+        <% end %>
+      <% else %>
+        <% @suggestions.each do |recipe| %>
+          <%= render "kitchen/recipe_card", recipe: recipe %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
