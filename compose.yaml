@@ -32,8 +32,8 @@ services:
       TZ: UTC
       # Rails session/cookie signing key (required). Generate with: openssl rand -hex 64
       SECRET_KEY_BASE: replace-with-64-byte-hex
-      # Optional. Base URL of a FlareSolverr instance, only needed if you turn
-      # on a feature that scrapes a Cloudflare-protected recipe site. Leave
-      # unset to keep those features disabled — nosh runs fine without it.
-      # This can also be set from the in-app Settings page instead of here.
-      # FLARESOLVERR_URL: http://flaresolverr.example:8191/v1
+      # Optional. Comma-separated origins allowed to embed nosh in an iframe —
+      # the /kitchen screen is built to be framed by a Home Assistant dashboard.
+      # Unset means same-origin only, which is the right default. Use the exact
+      # origin the *parent* page is loaded from, scheme and port included.
+      # NOSH_FRAME_ANCESTORS: https://homeassistant.example,http://10.0.0.1:8123

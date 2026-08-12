@@ -7,6 +7,13 @@ require "rails/all"
 Bundler.require(*Rails.groups)
 
 module Nosh
+  # Origins allowed to embed nosh in an iframe, from a comma-separated env var.
+  # Empty (the default) means same-origin only. Feeds CSP's frame-ancestors —
+  # see docs/adr/20260812-framed-by-home-assistant.md.
+  def self.frame_ancestors(value = ENV["NOSH_FRAME_ANCESTORS"])
+    value.to_s.split(",").map(&:strip).reject(&:empty?)
+  end
+
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.1
@@ -23,6 +30,13 @@ module Nosh
     config.autoload_lib(ignore: %w[assets tasks])
 
     config.time_zone = ENV.fetch("TZ", "UTC")
+
+    # Rails defaults to X-Frame-Options: SAMEORIGIN, which has no multi-origin
+    # form and which browsers won't let you combine with CSP frame-ancestors.
+    # The kitchen screen has to be framable by Home Assistant, so the header
+    # goes and frame-ancestors takes over — see the initializer, and
+    # docs/adr/20260812-framed-by-home-assistant.md.
+    config.action_dispatch.default_headers.delete("X-Frame-Options")
 
     # The running build's git SHA — written into REVISION/REVISION_SHORT by the
     # Docker build (absent in dev, so it falls back to "dev"). Shown in the
