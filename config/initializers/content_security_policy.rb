@@ -12,6 +12,6 @@
 # means 'self' alone, so nothing changes for anyone deploying nosh without it.
 Rails.application.configure do
   config.content_security_policy do |policy|
-    policy.frame_ancestors :self, *Nosh.frame_ancestors
+    policy.frame_ancestors :self, *Nosh::LOOPBACK_FRAME_ANCESTORS, *Nosh.frame_ancestors
   end
 end

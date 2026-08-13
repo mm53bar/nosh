@@ -7,6 +7,13 @@ require "rails/all"
 Bundler.require(*Rails.groups)
 
 module Nosh
+  # Kiosk browsers commonly serve their dashboard from a port on the device
+  # itself, so the page framing nosh is a loopback origin whose port belongs to
+  # whichever kiosk app is installed. Allowing loopback outright means a kiosk
+  # needs no configuration at all. It grants little: a page can only claim this
+  # origin by already running on the viewer's own machine.
+  LOOPBACK_FRAME_ANCESTORS = %w[http://127.0.0.1:* http://localhost:*].freeze
+
   # Origins allowed to embed nosh in an iframe, from a comma-separated env var.
   # Empty (the default) means same-origin only. Feeds CSP's frame-ancestors —
   # see docs/adr/20260812-framed-by-home-assistant.md.

@@ -32,8 +32,12 @@ services:
       TZ: UTC
       # Rails session/cookie signing key (required). Generate with: openssl rand -hex 64
       SECRET_KEY_BASE: replace-with-64-byte-hex
-      # Optional. Comma-separated origins allowed to embed nosh in an iframe —
-      # the /kitchen screen is built to be framed by a Home Assistant dashboard.
-      # Unset means same-origin only, which is the right default. Use the exact
-      # origin the *parent* page is loaded from, scheme and port included.
-      # NOSH_FRAME_ANCESTORS: https://homeassistant.example,http://10.0.0.1:8123
+      # Optional, and usually unnecessary. The /kitchen screen is built to be
+      # framed by a Home Assistant dashboard, and loopback origins are allowed
+      # out of the box — a kiosk browser serves its dashboard from a port on the
+      # device itself, so that covers the normal wall-panel case with no config.
+      #
+      # Set this only to frame nosh from a *named* host, e.g. opening the same
+      # dashboard on a laptop. Comma-separated, and the value is the origin of
+      # the parent page, scheme and port included — not nosh's own URL.
+      # NOSH_FRAME_ANCESTORS: https://homeassistant.example

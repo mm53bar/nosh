@@ -12,19 +12,33 @@ class FramingHeadersTest < ActionDispatch::IntegrationTest
     assert_nil response.headers["X-Frame-Options"]
   end
 
-  test "frame-ancestors is same-origin only when NOSH_FRAME_ANCESTORS is unset" do
+  # A kiosk browser serves its dashboard from a port on the device itself, so
+  # the framing origin is loopback with an app-specific port. Allowing loopback
+  # by default is what lets a kiosk work with no configuration at all.
+  test "loopback is framable by default, with no env var set" do
     get recipes_path
 
-    assert_equal "frame-ancestors 'self'", response.headers["Content-Security-Policy"]
+    assert_equal "frame-ancestors 'self' http://127.0.0.1:* http://localhost:*",
+      response.headers["Content-Security-Policy"]
+  end
+
+  test "no routable origin is framable by default" do
+    get recipes_path
+
+    ancestors = response.headers["Content-Security-Policy"].delete_prefix("frame-ancestors ").split
+    assert ancestors.all? { |origin| origin.match?(%r{\A('self'|https?://(127\.0\.0\.1|localhost):)}) },
+      "expected only self and loopback by default, got #{ancestors.inspect}"
   end
 
   # The policy is built from ENV at boot, so this exercises the directive the
   # initializer constructs rather than re-booting the app with the var set.
-  test "configured origins are appended to 'self'" do
+  test "configured origins are appended to the defaults" do
     policy = ActionDispatch::ContentSecurityPolicy.new
-    policy.frame_ancestors :self, *Nosh.frame_ancestors("https://hass.example, http://10.0.0.1:8123")
+    policy.frame_ancestors :self, *Nosh::LOOPBACK_FRAME_ANCESTORS,
+      *Nosh.frame_ancestors("https://hass.example, http://10.0.0.1:8123")
 
-    assert_equal "frame-ancestors 'self' https://hass.example http://10.0.0.1:8123", policy.build
+    assert_equal "frame-ancestors 'self' http://127.0.0.1:* http://localhost:* " \
+      "https://hass.example http://10.0.0.1:8123", policy.build
   end
 
   test "frame ancestor parsing tolerates blanks and stray whitespace" do
