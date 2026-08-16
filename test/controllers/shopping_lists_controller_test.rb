@@ -35,4 +35,20 @@ class ShoppingListsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_not JSON.parse(response.body)["configured"], "no HA configured in test env"
   end
+
+  # nanoclaw's first real publish silently failed this way: a JSON body posted to
+  # the suffix-less path was treated as an HTML form and answered with a 422 CSRF
+  # error page rather than doing anything.
+  test "a json body is accepted without the .json suffix" do
+    ActionController::Base.allow_forgery_protection = true
+
+    assert_enqueued_with(job: ShoppingListPushJob) do
+      post "/shopping_list/publish", params: { start_date: "2026-08-17", end_date: "2026-08-23" }.to_json,
+           headers: { "Content-Type" => "application/json" }
+    end
+
+    assert_response :redirect
+  ensure
+    ActionController::Base.allow_forgery_protection = false
+  end
 end
