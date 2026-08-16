@@ -54,4 +54,23 @@ class RecipesControllerTest < ActionDispatch::IntegrationTest
     get recipes_path
     assert_select "a[data-facet='equipment'][data-value='Instant Pot']"
   end
+
+  # The exact shape the one-time note backfill PATCHes with: update ingredients
+  # in place by id, setting name and note together. Nested attributes update
+  # rather than replace, so an untouched ingredient must survive unchanged.
+  test "updates ingredient name and note in place by id" do
+    recipe = recipes(:one)
+    target = recipe.ingredients.order(:position).first
+    untouched = recipe.ingredients.order(:position).last
+
+    patch recipe_path(recipe), params: {
+      recipe: { ingredients_attributes: [ { id: target.id, name: "extra-firm tofu", note: "14 ounce; drained" } ] }
+    }, as: :json
+
+    assert_response :success
+    assert_equal "extra-firm tofu", target.reload.name
+    assert_equal "14 ounce; drained", target.note
+    assert_equal untouched.name, untouched.reload.name
+    assert_equal recipe.ingredients.count, recipe.reload.ingredients.count
+  end
 end

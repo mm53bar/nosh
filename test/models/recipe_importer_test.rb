@@ -46,6 +46,16 @@ class RecipeImporterTest < ActiveSupport::TestCase
     assert_equal [ "Press and cube the tofu.", "Stir-fry until golden." ], recipe.steps.map(&:instruction)
   end
 
+  test "splits package sizes and prep out of an ingredient name into its note" do
+    html = json_ld_page(recipeIngredient: [ "1 (14 ounce) package extra-firm tofu, drained" ])
+
+    recipe = RecipeImporter.new("https://example.com/r", html: html).call.recipe
+    ingredient = recipe.ingredients.first
+
+    assert_equal "extra-firm tofu", ingredient.name
+    assert_equal "14 ounce; drained", ingredient.note
+  end
+
   test "reports an error when the page has no Recipe JSON-LD" do
     result = RecipeImporter.new("https://example.com/not-a-recipe", html: "<html><body>nothing here</body></html>").call
 
@@ -74,5 +84,14 @@ class RecipeImporterTest < ActiveSupport::TestCase
 
     assert result.success?, result.error
     assert_equal "Graph Recipe", result.recipe.title
+  end
+
+  private
+
+  def json_ld_page(**overrides)
+    data = { "@context" => "https://schema.org/", "@type" => "Recipe", "name" => "Test Recipe",
+             "recipeIngredient" => [], "recipeInstructions" => [] }.merge(overrides.transform_keys(&:to_s))
+
+    %(<script type="application/ld+json">#{data.to_json}</script>)
   end
 end

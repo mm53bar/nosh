@@ -41,3 +41,17 @@ services:
       # dashboard on a laptop. Comma-separated, and the value is the origin of
       # the parent page, scheme and port included — not nosh's own URL.
       # NOSH_FRAME_ANCESTORS: https://homeassistant.example
+      #
+      # Optional. Set these and nosh can push its shopping list into a Home
+      # Assistant to-do list, so the list is reachable by voice and on whatever
+      # screens HA already drives. Any integration behind the generic `todo`
+      # domain works — local_todo, Bring!, Todoist, CalDAV, Google Tasks.
+      #
+      # Use HA's IP rather than a hostname: a hostname makes a call between two
+      # machines on the same subnet depend on a reverse proxy.
+      #
+      # Mint the token as its OWN non-admin HA user. A long-lived token carries
+      # its owner's permissions, so an owner's token would give nosh the house.
+      # HA_BASE_URL: http://192.168.1.10:8123
+      # HA_TOKEN: replace-with-a-long-lived-access-token
+      # HA_TODO_ENTITY: todo.shopping_list

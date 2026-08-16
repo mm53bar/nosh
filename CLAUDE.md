@@ -55,6 +55,13 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   Rails encrypted credentials remain an optional escape hatch. See
   `docs/adr/20260809-secrets-from-env.md`. Never commit a real secret; `compose.yaml` carries
   placeholders only.
+- The shopping list **publishes to a Home Assistant to-do list** and is not meant to be read in
+  nosh — `POST /shopping_list/publish` ("lock it in"), one entry point for both the UI and an API
+  caller. The push is **additive only**: that list has other writers, so never clear it, never
+  bulk-replace it, and don't remove items. Categories and ordering belong to HA, which sorts by a
+  hidden due date and categorises every item whoever added it — don't send a category or compute
+  a sort key here. All config is env (`HA_*`), and nosh works normally with none of it set. See
+  `docs/adr/20260815-shopping-list-publishes-to-home-assistant.md`.
 - Deployment is a single container: web + Solid Queue run together in Puma
   (`config/puma.rb`, gated on `RAILS_ENV=production`) — no separate worker service, no Redis.
 - Testing: Minitest with fixtures. No RSpec, no factories, no mocking library, no

@@ -22,6 +22,8 @@ Rails.application.routes.draw do
 
   resource :shopping_list, only: [ :show, :destroy ] do
     post :generate
+    post :publish
+    get :publish_preview
   end
   resources :shopping_list_items, only: [ :update ] do
     collection { patch :bulk_update }

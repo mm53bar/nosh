@@ -14,13 +14,6 @@ class RecipeImporter
     def success? = error.nil?
   end
 
-  UNIT_WORDS = %w[
-    cup cups tbsp tbsps tablespoon tablespoons tsp tsps teaspoon teaspoons
-    g gram grams kg lb lbs pound pounds oz ounce ounces ml milliliter milliliters
-    l liter liters clove cloves can cans piece pieces slice slices pinch pinches
-    bunch bunches stalk stalks sprig sprigs
-  ].freeze
-
   # html: lets tests inject a canned page body instead of hitting the network
   # — the same "inject a fake at the real dependency" pattern used elsewhere
   # in this app family (e.g. blip's ImapIntakeJob) rather than a mocking library.
@@ -139,13 +132,7 @@ class RecipeImporter
     end
   end
 
-  def parse_ingredient_line(line)
-    match = line.to_s.strip.match(/\A([\d¼½¾⅓⅔⅛⅜⅝⅞.\/\s]+)\s*(#{UNIT_WORDS.join("|")})?\.?\s+(.+)\z/i)
-    return { amount: nil, unit: nil, name: line.to_s.strip } unless match
-
-    amount, unit, name = match[1]&.strip, match[2], match[3]&.strip
-    name.present? ? { amount: amount, unit: unit, name: name } : { amount: nil, unit: nil, name: line.to_s.strip }
-  end
+  def parse_ingredient_line(line) = IngredientLine.parse(line).to_attributes
 
   def attach_image(recipe, image)
     url = Array(image).first

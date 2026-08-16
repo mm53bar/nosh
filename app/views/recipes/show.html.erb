@@ -75,7 +75,9 @@
               <span class="font-semibold text-amber-700 whitespace-nowrap shrink-0">
                 <%= [ ingredient.amount, ingredient.unit ].compact_blank.join(" ") %>
               </span>
-              <span class="text-stone-800"><%= ingredient.name %></span>
+              <span class="text-stone-800">
+                <%= ingredient.name %><% if ingredient.note.present? %><span class="text-stone-400">, <%= ingredient.note %></span><% end %>
+              </span>
             </li>
           <% end %>
         </ul>

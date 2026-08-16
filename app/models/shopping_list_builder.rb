@@ -19,7 +19,12 @@ class ShoppingListBuilder
     ShoppingListItem.transaction do
       ShoppingListItem.delete_all
       aggregated.each_value do |item|
-        ShoppingListItem.create!(name: item[:name], amount: combined_amount(item[:amounts]), unit: item[:unit])
+        ShoppingListItem.create!(
+          name: item[:name],
+          amount: combined_amount(item[:amounts]),
+          unit: item[:unit],
+          source: item[:sources].uniq.join(", ").presence
+        )
       end
     end
 
@@ -37,7 +42,10 @@ class ShoppingListBuilder
 
       entry.recipe.ingredients.each do |ingredient|
         key = "#{ingredient.name.downcase}|#{ingredient.unit.to_s.downcase}"
-        item = aggregated[key] ||= { name: ingredient.name, unit: ingredient.unit, amounts: [] }
+        item = aggregated[key] ||= { name: ingredient.name, unit: ingredient.unit, amounts: [], sources: [] }
+        # Kept so a shopping list can say *why* an item is on it — "tahini,
+        # 200 g · Tofu Noodles" answers a question a bare name cannot.
+        item[:sources] << entry.recipe.title
         next if ingredient.amount.blank?
 
         numeric = Float(ingredient.amount, exception: false)
