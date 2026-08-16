@@ -106,10 +106,25 @@ class RecipesController < ApplicationController
   # imported this way).
   def import
     result = RecipeImporter.new(params[:url]).call
-    if result.success?
-      redirect_to result.recipe, notice: "Imported \"#{result.recipe.title}\"."
-    else
-      redirect_to recipes_path, alert: result.error
+
+    respond_to do |format|
+      format.html do
+        if result.success?
+          redirect_to result.recipe, notice: "Imported \"#{result.recipe.title}\"."
+        else
+          redirect_to recipes_path, alert: result.error
+        end
+      end
+      # So an API caller can hand nosh a URL instead of hand-building a payload,
+      # and get the ingredient split for free.
+      format.json do
+        if result.success?
+          @recipe = result.recipe
+          render :show, status: :created
+        else
+          render json: { errors: [ result.error ] }, status: :unprocessable_entity
+        end
+      end
     end
   end
 

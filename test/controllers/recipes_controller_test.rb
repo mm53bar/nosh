@@ -73,4 +73,23 @@ class RecipesControllerTest < ActionDispatch::IntegrationTest
     assert_equal untouched.name, untouched.reload.name
     assert_equal recipe.ingredients.count, recipe.reload.ingredients.count
   end
+
+  test "the index json carries the fields a slate builder needs" do
+    get recipes_path(format: :json)
+
+    row = JSON.parse(response.body).first
+    assert row.key?("source_url")
+    assert row.key?("prep_time_minutes")
+    assert row.key?("total_time_minutes")
+  end
+
+  # The JSON branch exists so a caller can hand nosh a URL instead of building
+  # a payload. The happy path needs the network, so RecipeImporter's own tests
+  # cover the parse; this pins the response shape and status.
+  test "importing reports failure as json rather than a redirect" do
+    post import_recipes_path(format: :json), params: { url: "javascript:alert(1)" }
+
+    assert_response :unprocessable_entity
+    assert_match(/invalid url/i, JSON.parse(response.body)["errors"].first)
+  end
 end

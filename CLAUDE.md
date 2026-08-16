@@ -55,6 +55,11 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   Rails encrypted credentials remain an optional escape hatch. See
   `docs/adr/20260809-secrets-from-env.md`. Never commit a real secret; `compose.yaml` carries
   placeholders only.
+- Ingredient `name` is the **shopping label**; package sizes, prep and substitutions go in
+  `note`. `Ingredient` splits a freeform name on create when no note is given, so API callers
+  can post a raw scraped line — don't add splitting logic to callers. `bin/rails
+  ingredients:lint` reports what still needs a human. See
+  `docs/adr/20260815-ingredient-name-is-the-shopping-label.md`.
 - The shopping list **publishes to a Home Assistant to-do list** and is not meant to be read in
   nosh — `POST /shopping_list/publish` ("lock it in"), one entry point for both the UI and an API
   caller. The push is **additive only**: that list has other writers, so never clear it, never

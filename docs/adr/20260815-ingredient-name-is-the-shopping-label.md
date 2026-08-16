@@ -49,6 +49,12 @@ both call, so a name imported today and a name repaired tomorrow are shaped by t
 Everything else stays in `name` untouched. Substitutions ("white wine or vermouth") and lines
 covering several ingredients at once are left exactly as found.
 
+`Ingredient` applies the split itself on **create**, when the caller supplied no `note` — so an
+API client can post the raw line it scraped and still get a shopping label. Narrow on purpose:
+create only, because an update is a person deciding and re-parsing would undo them; and `amount`
+and `unit` are filled only when empty, so nothing a caller sent is discarded. Without this, every
+writer needs its own parser and the collection re-dirties each time one of them runs.
+
 `IngredientNameLinter` reports names that still look wrong. It is a reporter, never an editor,
 and deliberately **not** a model validation: a validation would reject legitimate imports and
 start failing nanoclaw's recipe-discovery writes, turning a data-quality signal into an outage.
