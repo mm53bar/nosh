@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html>
+<%# The theme class is the hook every `dark:` utility on this screen hangs off —
+    see the @custom-variant in app/assets/tailwind/application.css. It's on <html>
+    rather than <body> so `color-scheme` reaches the iframe's own scrollbars. %>
+<html class="theme-<%= kitchen_theme %>">
   <head>
     <title><%= content_for(:title) || "Kitchen — nosh" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -18,7 +21,7 @@
   <%# h-dvh + overflow-hidden: inside the Home Assistant iframe the viewport is
       a fixed box, and the whole point of this screen is that ingredients and
       steps stay on it at once. Panes scroll individually; the page never does. %>
-  <body class="bg-stone-50 text-stone-900 h-dvh overflow-hidden text-[19px] antialiased">
+  <body class="bg-stone-50 text-stone-900 dark:bg-neutral-950 dark:text-neutral-100 h-dvh overflow-hidden text-[19px] antialiased">
     <%= yield %>
   </body>
 </html>

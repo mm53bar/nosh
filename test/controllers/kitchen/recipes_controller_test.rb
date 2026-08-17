@@ -40,4 +40,13 @@ class Kitchen::RecipesControllerTest < ActionDispatch::IntegrationTest
   ensure
     ActionController::Base.allow_forgery_protection = false
   end
+
+  # There's no way to re-enter a URL on the kiosk, so the theme has to ride
+  # along on every link out of this page or the cook lands on a white screen.
+  test "show keeps the theme on its way back" do
+    get kitchen_recipe_path(@recipe, theme: "dark")
+
+    assert_select "html.theme-dark"
+    assert_select "a[href=?]", kitchen_root_path(theme: "dark")
+  end
 end

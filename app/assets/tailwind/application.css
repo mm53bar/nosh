@@ -1,10 +1,56 @@
 @import "tailwindcss";
 
+/* `dark:` is opt-in per page rather than Tailwind's default bare media query:
+   only the kitchen wall screen has a dark palette, and the browse UI shouldn't
+   flip to half-styled dark just because a laptop is set that way. The kitchen
+   layout puts one of these classes on <html> from `?theme=` — theme-dark forces
+   it, theme-light forbids it, theme-auto (the default) defers to the device.
+   See Kitchen::BaseController. */
+@custom-variant dark {
+  &:where(.theme-dark, .theme-dark *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(.theme-auto, .theme-auto *) {
+      @slot;
+    }
+  }
+}
+
+/* Tells the browser to render its own furniture — scrollbars above all, which
+   the kiosk shows on both panes — to match the page. */
+:root.theme-light {
+  color-scheme: light;
+}
+:root.theme-dark {
+  color-scheme: dark;
+}
+:root.theme-auto {
+  color-scheme: light dark;
+}
+
 /* Recipe step tracking (tap-to-track cooking progress) — compound
    active/done states are simpler as a few plain CSS rules than forcing
-   them through Tailwind's arbitrary variants for a two-state component. */
+   them through Tailwind's arbitrary variants for a two-state component.
+   The two colours go through custom properties because these rules are shared
+   with the browse UI's show page, which has no theme class of its own. */
+:root {
+  --step-active-bg: theme("colors.amber.50");
+  --step-done-text: theme("colors.stone.400");
+}
+:root.theme-dark {
+  --step-active-bg: theme("colors.amber.950");
+  --step-done-text: theme("colors.neutral.600");
+}
+@media (prefers-color-scheme: dark) {
+  :root.theme-auto {
+    --step-active-bg: theme("colors.amber.950");
+    --step-done-text: theme("colors.neutral.600");
+  }
+}
+
 .step.active {
-  background-color: theme("colors.amber.50");
+  background-color: var(--step-active-bg);
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
@@ -19,5 +65,5 @@
   text-decoration: line-through;
 }
 .step.done .step-text {
-  color: theme("colors.stone.400");
+  color: var(--step-done-text);
 }

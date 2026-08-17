@@ -69,6 +69,11 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   hidden due date and categorises every item whoever added it — don't send a category or compute
   a sort key here. All config is env (`HA_*`), and nosh works normally with none of it set. See
   `docs/adr/20260815-shopping-list-publishes-to-home-assistant.md`.
+- The kitchen wall screen themes from the URL: `?theme=dark` / `?theme=light`, anything else (or
+  nothing) meaning auto via `prefers-color-scheme`. `dark:` is an **opt-in** Tailwind variant keyed
+  to a `theme-*` class the kitchen layout sets, so it never fires on the browse UI — every kitchen
+  colour utility needs its own `dark:` counterpart. See
+  `docs/adr/20260817-kitchen-screen-theme-param.md`.
 - Deployment is a single container: web + Solid Queue run together in Puma
   (`config/puma.rb`, gated on `RAILS_ENV=production`) — no separate worker service, no Redis.
 - Testing: Minitest with fixtures. No RSpec, no factories, no mocking library, no

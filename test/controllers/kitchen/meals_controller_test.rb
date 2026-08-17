@@ -64,6 +64,31 @@ class Kitchen::MealsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ recipes(:two).title, recipes(:one).title, never_made.title ], titles
   end
 
+  # The screen lives in a dark Home Assistant dashboard; Home Assistant picks the
+  # palette with `?theme=`. Auto is the default so an unset (or fat-fingered)
+  # param degrades to the light screen this started as, rather than to nothing.
+  test "the theme comes from the querystring, defaulting to auto" do
+    get kitchen_root_path
+    assert_select "html.theme-auto"
+
+    get kitchen_root_path(theme: "dark")
+    assert_select "html.theme-dark"
+
+    get kitchen_root_path(theme: "light")
+    assert_select "html.theme-light"
+
+    get kitchen_root_path(theme: "chartreuse")
+    assert_select "html.theme-auto"
+  end
+
+  test "a theme set on this page carries into the recipe it links to" do
+    MealPlanEntry.update_all(date: Date.current)
+
+    get kitchen_root_path(theme: "dark")
+
+    assert_select "a[href=?]", kitchen_recipe_path(recipes(:one), theme: "dark")
+  end
+
   test "suggestions exclude non-dinners" do
     MealPlanEntry.delete_all
     Recipe.create!(title: "Morning Toast", meal_type: "Breakfast")
