@@ -62,8 +62,10 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   `docs/adr/20260815-ingredient-name-is-the-shopping-label.md`.
 - The shopping list **publishes to a Home Assistant to-do list** and is not meant to be read in
   nosh — `POST /shopping_list/publish` ("lock it in"), one entry point for both the UI and an API
-  caller. The push is **additive only**: that list has other writers, so never clear it, never
-  bulk-replace it, and don't remove items. Categories and ordering belong to HA, which sorts by a
+  caller. Publishing removes **bought** items first (`todo.remove_completed_items`) then adds
+  what's missing — otherwise last week's purchase suppresses this week's genuine need for the
+  same ingredient. Outstanding items, whoever added them, are never touched and the list is never
+  bulk-replaced. Publish **once per plan**: a second run after a shop re-adds the whole trip. Categories and ordering belong to HA, which sorts by a
   hidden due date and categorises every item whoever added it — don't send a category or compute
   a sort key here. All config is env (`HA_*`), and nosh works normally with none of it set. See
   `docs/adr/20260815-shopping-list-publishes-to-home-assistant.md`.

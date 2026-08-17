@@ -83,4 +83,12 @@ class HomeAssistantTodoTest < ActiveSupport::TestCase
 
     assert_equal 1, transport.gets.size
   end
+
+  test "clears completed items through the generic todo service" do
+    transport = FakeTransport.new
+
+    assert build(transport).clear_completed
+    assert_equal "/api/services/todo/remove_completed_items", transport.posts.last.first
+    assert_equal({ entity_id: "todo.shopping_list" }, transport.posts.last.last)
+  end
 end

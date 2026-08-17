@@ -62,6 +62,15 @@ class HomeAssistantTodo
     true
   end
 
+  # Removes items already checked off. Not "clearing the list" — the outstanding
+  # items, whoever added them, are untouched. Completed means bought, and a
+  # bought item left on the list would suppress a later legitimate re-add of the
+  # same ingredient (the diff treats anything present as already handled).
+  def clear_completed
+    transport.post("/api/services/todo/remove_completed_items", { entity_id: entity_id })
+    true
+  end
+
   def supports_description?
     return @supports_description unless @supports_description.nil?
 

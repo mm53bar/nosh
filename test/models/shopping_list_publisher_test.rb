@@ -3,14 +3,17 @@ require "test_helper"
 class ShoppingListPublisherTest < ActiveSupport::TestCase
   # A to-do list that records what was added, standing in for Home Assistant.
   class FakeTodo
-    attr_reader :added
+    attr_reader :added, :cleared
 
     def initialize(existing: [], configured: true, supports_description: true)
       @existing = existing
       @configured = configured
       @supports_description = supports_description
       @added = []
+      @cleared = false
     end
+
+    def clear_completed = @cleared = true
 
     def configured? = @configured
     def supports_description? = @supports_description
@@ -109,5 +112,23 @@ class ShoppingListPublisherTest < ActiveSupport::TestCase
     assert_not result.configured?
     assert_empty todo.added
     assert_match(/not configured/i, result.summary)
+  end
+
+  # Bought items must go before the diff, or last week's purchase suppresses
+  # this week's genuine need for the same ingredient.
+  test "clears bought items before diffing" do
+    todo = FakeTodo.new
+
+    ShoppingListPublisher.new(todo: todo).publish
+
+    assert todo.cleared
+  end
+
+  test "previewing never clears anything" do
+    todo = FakeTodo.new
+
+    ShoppingListPublisher.new(todo: todo).preview
+
+    assert_not todo.cleared
   end
 end

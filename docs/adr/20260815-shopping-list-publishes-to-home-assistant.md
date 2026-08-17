@@ -32,7 +32,21 @@ case-insensitively, and adds what is missing:
   item is on the list. `ShoppingListItem#source` was added to make this possible.
 - Categories, sort keys and ordering are Home Assistant's business. nosh sends neither.
 
-**Additive only.** No clearing, no bulk replace, no removing items. That list is live household
+**Additive, and it removes only what has been bought.** Publishing first calls
+`todo.remove_completed_items`, then diffs, then adds. Outstanding items — whoever added them —
+are never touched, and the list is never bulk-replaced.
+
+Clearing bought items is not tidiness. The diff treats anything already present as handled, so a
+staple bought last week and left sitting `completed` would silently suppress this week's genuine
+need for it. Taking bought items out first makes "already on the list" mean "still outstanding",
+which is the only reading that stays true week to week.
+
+The limit worth knowing: this does **not** make re-publishing the same plan idempotent. Anything
+bought since the last publish is cleared and re-added. Publish once per plan; a second run after
+a shop would re-add the whole trip. Discovered the hard way on 2026-08-16, when a re-publish
+would have added 55 items that had all just been bought.
+
+**No bulk replace, no removing outstanding items.** That list is live household
 state with several writers, and `ShoppingListBuilder`'s `delete_all`-then-rebuild is safe
 precisely because it only ever touches nosh's own table. The worst a publish can do is leave a
 stale item behind, which beats deleting something a person put there by voice.

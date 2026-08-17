@@ -37,6 +37,14 @@ class ShoppingListPublisher
   def publish
     return unconfigured_result unless @todo.configured?
 
+    # Bought items go before the diff is taken, so last week's purchases don't
+    # suppress this week's genuine need for the same ingredient. Everything left
+    # is outstanding, which is exactly what "already on the list" should mean.
+    #
+    # This does NOT make re-publishing the same plan idempotent: anything bought
+    # since the last publish is cleared and then re-added. Publish once per plan.
+    @todo.clear_completed
+
     already = existing_summaries
     added = []
     skipped = []
