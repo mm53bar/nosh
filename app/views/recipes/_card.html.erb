@@ -16,7 +16,7 @@
       } do %>
   <div class="aspect-video bg-stone-200 overflow-hidden">
     <% if recipe.image.attached? %>
-      <%= image_tag recipe.image, class: "w-full h-full object-center object-cover group-hover:scale-[1.02] transition-transform duration-300" %>
+      <%= image_tag recipe_image_source(recipe, :card), loading: "lazy", decoding: "async", class: "w-full h-full object-center object-cover group-hover:scale-[1.02] transition-transform duration-300" %>
     <% else %>
       <div class="w-full h-full flex items-center justify-center text-stone-400 text-sm">No image</div>
     <% end %>

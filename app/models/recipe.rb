@@ -1,7 +1,21 @@
 class Recipe < ApplicationRecord
   include HasEquipment
 
-  has_one_attached :image
+  # Named variants rather than inline `variant(resize_to_fill: ...)` hashes, so
+  # they can be *warmed*: a variant identified only by an anonymous hash at the
+  # call site is invisible to any backfill task, so the first request for each
+  # one pays generation cost on a Puma thread (there are only 3). Named +
+  # `preprocessed` means Rails generates them on attach, and a rake task can
+  # backfill the ones attached before this existed. See
+  # docs/adr/20260818-named-variants-so-they-can-be-warmed.md.
+  has_one_attached :image do |attachable|
+    attachable.variant :card, resize_to_fill: [ 720, 405 ], format: :jpeg,
+                       saver: { quality: 80 }, preprocessed: true
+    attachable.variant :kitchen_card, resize_to_fill: [ 480, 270 ], format: :jpeg,
+                       saver: { quality: 80 }, preprocessed: true
+    attachable.variant :kitchen_corner, resize_to_fill: [ 562, 316 ], format: :jpeg,
+                       saver: { quality: 80 }, preprocessed: true
+  end
 
   has_many :ingredients, -> { order(:position) }, dependent: :destroy, inverse_of: :recipe
   has_many :steps, -> { order(:position) }, dependent: :destroy, inverse_of: :recipe

@@ -1,28 +1,23 @@
 module KitchenHelper
   # Card thumbnails, sized for the wall screen rather than served as originals.
-  # The stored photos are full-resolution (up to ~200 KB each), which is a lot
-  # of decode for a 1 GB Echo Show; at 480×270 a card is a fraction of that.
-  # Variants are generated on first request and cached from then on.
-  KITCHEN_CARD_VARIANT = { resize_to_fill: [ 480, 270 ] }.freeze
-
-  # The recipe screen's photo: the top of the ingredients column, and the
-  # surface the host's back button lands on. Its CSS box is about 281×158, and
-  # the kiosk renders at dpr 1.5, so the variant is drawn at twice that.
-  KITCHEN_CORNER_VARIANT = { resize_to_fill: [ 562, 316 ] }.freeze
+  # The stored photos are full-resolution — median 140 KB but with a long tail
+  # (one was 8192×5464 at 14.9 MB until 2026-08-18), which is a lot of decode
+  # for a 1 GB Echo Show; at 480×270 a card is a fraction of that.
+  #
+  # The sizes live on the model as the named :kitchen_card / :kitchen_corner
+  # variants now, not as hashes here, so they can be warmed — see Recipe.
 
   def kitchen_card_image(recipe, **options)
     return nil unless recipe.image.attached?
 
-    source = recipe.image.variable? ? recipe.image.variant(**KITCHEN_CARD_VARIANT) : recipe.image
-    image_tag source, loading: "lazy", **options
+    image_tag recipe_image_source(recipe, :kitchen_card), loading: "lazy", **options
   end
 
   # Not lazy, unlike the cards: this one is the first thing on the screen.
   def kitchen_corner_image(recipe, **options)
     return nil unless recipe.image.attached?
 
-    source = recipe.image.variable? ? recipe.image.variant(**KITCHEN_CORNER_VARIANT) : recipe.image
-    image_tag source, **options
+    image_tag recipe_image_source(recipe, :kitchen_corner), **options
   end
 
   def last_made_label(recipe)
