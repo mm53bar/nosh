@@ -80,7 +80,7 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   into it with a negative margin). Like `?theme=`, it rides along on every link via
   `default_url_options`. The rule is that nothing of nosh's in that square may need reading or
   tapping — the recipe screen satisfies it with the dish photo under the button rather than with
-  blank space. nosh's own in-app navigation stays inside nosh's content and carries a label
+  blank space, at the top of its left column (two columns top to bottom, verso's shape). nosh's own in-app navigation stays inside nosh's content and carries a label
   (`‹ This week`) rather than being a second bare arrow in the host's corner. The framed viewport
   is **853×533 CSS px**, not 1280×800: both kitchen headers are one row, and the week's grid is
   tuned so all seven days clear the fold with 5.5px to spare — re-measure before growing a card or

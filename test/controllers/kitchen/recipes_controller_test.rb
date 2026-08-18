@@ -81,32 +81,34 @@ class Kitchen::RecipesControllerTest < ActionDispatch::IntegrationTest
   end
 
   # The corner the host's button covers has to hold nothing that needs reading
-  # or tapping. A photo satisfies that better than blank space, so a recipe with
-  # an image puts the dish there and only an image-less one falls back to the
-  # blank reserve.
-  test "a recipe with a photo puts it in the corner instead of reserving it" do
+  # or tapping. The photo at the top of the ingredients column satisfies that,
+  # so this screen reserves nothing — but the block has to be there even when
+  # the recipe has no picture, or the button lands on the ingredient list.
+  test "the dish sits in the corner the host's button covers" do
     # The bytes are never decoded here — the view only builds a variant URL —
     # so a stand-in blob is enough to exercise the branch.
     @recipe.image.attach(io: StringIO.new("not really a jpeg"), filename: "photo.jpg", content_type: "image/jpeg")
 
     get kitchen_recipe_path(@recipe, embed: "1")
 
-    assert_select "header figure img"
-    assert_select "header.ps-\\[74px\\]", count: 0
+    assert_select "aside figure.aspect-video img"
     assert_select "a[href=?]", kitchen_root_path(embed: "1"), text: /This week/
   end
 
-  test "a recipe with no photo falls back to reserving the corner" do
+  test "a recipe with no photo still gives the button something to land on" do
     get kitchen_recipe_path(@recipe, embed: "1")
 
-    assert_select "header figure", count: 0
-    assert_select "header.ps-\\[74px\\].min-h-\\[74px\\]"
+    assert_select "aside figure.h-\\[78px\\]"
+    assert_select "aside figure img", count: 0
   end
 
-  test "the corner is only reserved when the dashboard asks for it" do
-    get kitchen_recipe_path(@recipe)
+  # Nothing on this screen is indented for the button, embedded or not — the
+  # photo is what keeps the corner clear.
+  test "the recipe screen reserves no blank corner either way" do
+    get kitchen_recipe_path(@recipe, embed: "1")
+    assert_select ".ps-\\[74px\\]", count: 0
 
-    assert_select "header.ps-\\[74px\\]", count: 0
-    assert_select "header.ps-6"
+    get kitchen_recipe_path(@recipe)
+    assert_select ".ps-\\[74px\\]", count: 0
   end
 end

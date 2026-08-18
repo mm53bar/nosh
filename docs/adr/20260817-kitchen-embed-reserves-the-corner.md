@@ -29,8 +29,10 @@ blank would just look like a layout bug.
 `?embed=1` on any `/kitchen` URL means "a back button is being drawn over your corner". The rule
 that follows is not *leave 74px blank* but **nothing of nosh's inside that square may need reading
 or tapping**. Blank satisfies it. A photo satisfies it better, and is what the recipe screen does:
-the dish, 112×88, flush in the corner with the host's circle sitting on it — the same move verso
-makes with its artwork. About one recipe in ten has no image; those fall back to the blank square.
+the dish at the top of the ingredients column, 281×158, with the host's circle sitting on it as a
+corner overlay — the same move verso makes with its artwork. About one recipe in ten has no image;
+those get a bare tinted band, 78px tall, because the button needs a surface whether or not there is
+a picture for it.
 
 For screens with no image to give — the week — the topmost element takes 74px of leading padding
 instead of its usual `ps-8`, **and a 74px min-height**. When `embed` isn't set, nothing changes.
@@ -53,11 +55,18 @@ reason — there's no address bar on the kiosk to re-enter it with, so a param s
 embedded URL has to survive every tap.
 
 The recipe screen keeps its own way back, but stops spelling it as a corner button: it becomes a
-labelled `‹ This week` link on the same line as the recipe title, reading as the first crumb of a
-trail. The two controls are differentiated rather than deduplicated — **host chrome stays a circle
-in the corner, guest navigation stays inside the guest's content** — which is what makes it obvious
-that they go to different places. It's unconditional rather than embed-only: one screen to reason
-about, and the label reads better than a bare glyph on a standalone kiosk too.
+labelled `‹ This week` link sitting above the recipe title, the crumb the recipe hangs off. The two
+controls are differentiated rather than deduplicated — **host chrome stays a circle in the corner,
+guest navigation stays inside the guest's content** — which is what makes it obvious that they go
+to different places. It's unconditional rather than embed-only: one screen to reason about, and the
+label reads better than a bare glyph on a standalone kiosk too.
+
+That, with the photo, gives the recipe screen **verso's shape: two columns running top to bottom,
+no header band across them.** Left column — the dish, then the ingredients, scrolling under it.
+Right column — crumb and title fixed, method scrolling under them. An earlier draft kept the
+full-width header and shrank the photo into it at 112×88, which cost almost no layout height but
+spent half the picture on the button sitting over it. At 281×158 the button is a corner overlay,
+and the title, alone on its own rows, wraps to two lines instead of truncating at 46 characters.
 
 Both kitchen headers are then cut to one row. The frame is **853×533 CSS px** — measured from the
 dashboard, not the 1280×800 these screens were first drawn against — so the recipe screen's
@@ -72,9 +81,9 @@ last instruction. The last-made label went with it and did not come back: on the
 cooking from, when it was last made is a fact about some other day. Nothing else on the kitchen
 screens reports it, and the JSON endpoint still returns the label for callers that want it.
 
-Measured after: the week's header is 74px (the reserve binds), the recipe's 78px — near the floor
-now that only a photo, a crumb and a title are in it, with the extra 4px there because the bottom
-border comes out of the photo and the 74px square has to fit inside what's left.
+Measured after: the week's header is 74px (the reserve binds). The recipe screen has no full-width
+header left to measure — its title block is 125px over the method column only, and the photo above
+the ingredients is 281×158, both comfortably clear of the 74px square.
 
 And with that height back, the week goes to **four cards across, two rows deep** — 188×221 each,
 bottom of row two at 527.5 of 533. All seven days are on screen at once, which is the whole point
@@ -91,9 +100,12 @@ had to come down ~27% either way.
 - Nothing may use a negative leading margin at the top of a kitchen screen — it would reach back
   into the reserved square, which padding alone can't defend. The breadcrumb pads on its trailing
   side only for this reason.
-- The recipe title gets the rest of the row once the button leaves it — 559px, about 45 characters,
-  where an earlier draft with the button and label alongside gave it 329px. Most titles now fit
-  whole.
+- Recipe titles no longer truncate at all: two lines of `text-2xl` over the method column holds
+  every title in the collection, where the single-row header cut them at about 46 characters.
+- The method column is 408px, down from 455 when a full-width header sat above both columns, and
+  six of a fourteen-ingredient list show before scrolling rather than nine. Both columns were
+  always going to scroll — that's what they're for — and the photo and the un-truncated title are
+  what the height bought.
 - "Made it" is below the fold on any recipe with more than a few steps. That's the point, but it
   does mean the one write on this screen is no longer visible on arrival — if a future screen wants
   it reachable without scrolling, that's a deliberate change, not a bug to fix in passing.
@@ -120,10 +132,13 @@ had to come down ~27% either way.
 - **Drop nosh's back button when embedded** and let Home Assistant's serve both jobs. Rejected on
   the Home Assistant side's own reading: they're two levels of navigation, not two spellings of
   one, and collapsing them would mean leaving the panel entirely to get back to the week.
-- **verso's full-height image column** (a `figure` at 42% width, art bleeding top to bottom, text
-  scrolling beside it). It's where the corner-photo idea came from, but at nosh's scale it would
-  push the ingredient list into a narrow scrolling strip to show a photo nobody reads while
-  cooking. The corner thumbnail takes the same trick at the size this screen can afford.
+- **verso's full-height image column** (a `figure` at 42% width, art bleeding top to bottom). Right
+  structure, wrong proportion for a screen whose left column is a list you read while cooking: the
+  photo is worth looking at once, the ingredients for the next forty minutes. 16:9 at the top of
+  that column is the same trick at the size this screen can afford.
+- **Keeping the photo as a 112×88 thumbnail in a full-width header.** Built first, and cheaper in
+  layout height by about 47px of method column — but the host's button covered half of it, which
+  is the thing a photo in that corner was supposed to fix.
 - **A generic `?inset-top-left=74` (or a CSS variable) instead of a boolean.** Rejected as
   premature: one embedder, one geometry, and a number in a URL invites a shape nobody has asked
   for. The boolean is easy to widen if a second dashboard ever wants a different corner.

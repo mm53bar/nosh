@@ -1,42 +1,23 @@
 <% content_for :title, "#{@recipe.title} — nosh" %>
 
-<div class="h-full flex flex-col">
-  <%# One row, because the frame is only ~533px tall and a three-line header was
-      eating a quarter of it. Fixed height so the photo can be flush to the top
-      left corner. 78px rather than 74: the bottom border comes out of the
-      photo's height, and the whole 74px square the host's button wants has to
-      fit inside the photo with a little left over. %>
-  <header class="shrink-0 h-[78px] flex items-center gap-5 pe-6 border-b border-stone-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 <%= @recipe.image.attached? ? "" : kitchen_corner_reserve("ps-6") %>">
-    <%# The dish, in the corner Home Assistant floats its back button over. A
-        photo is a better thing to put under that button than the blank square
-        nosh used to reserve — verso does the same with its artwork — and it
-        earns the space back by showing what you're about to cook. Recipes with
-        no image (about one in ten) fall back to reserving the corner empty. %>
-    <% if (photo = kitchen_corner_image(@recipe, class: "w-full h-full object-cover")) %>
-      <figure class="shrink-0 w-[112px] h-full bg-stone-200 dark:bg-neutral-800 overflow-hidden">
-        <%= photo %>
-      </figure>
-    <% end %>
+<%# Two columns running top to bottom, no header band across them — the shape
+    verso uses for its artwork screen, which is the household's other Echo Show
+    page. The dish sits at the top of the left column, where Home Assistant
+    floats its back button when this is embedded: a photo is a better thing to
+    put under that button than blank space, and at this size the button is a
+    corner overlay rather than half the picture. Each column scrolls on its own;
+    the page itself never does. %>
+<div class="h-full flex overflow-hidden">
+  <aside class="w-[33%] shrink-0 flex flex-col border-r border-stone-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+    <%# The block is here for the button to land on as much as for the dish, so
+        it renders either way: a photo at 16:9, or — for about one recipe in ten
+        — a bare tinted band tall enough to hold the 74px square the button
+        wants, and no taller. %>
+    <figure class="shrink-0 <%= @recipe.image.attached? ? "aspect-video" : "h-[78px]" %> bg-stone-200 dark:bg-neutral-800 overflow-hidden">
+      <%= kitchen_corner_image(@recipe, class: "w-full h-full object-cover") %>
+    </figure>
 
-    <%# The way back reads as the first crumb of a trail rather than a control
-        in the corner: two bare arrows side by side read as one control drawn
-        twice. They're two levels — the host's leaves nosh, this goes up to the
-        week — so this one is dressed as part of the title it belongs to. %>
-    <%= link_to kitchen_root_path,
-          class: "shrink-0 inline-flex items-center gap-1.5 py-3 text-lg font-semibold text-amber-700 dark:text-amber-400 active:text-amber-900 dark:active:text-amber-200" do %>
-      <span aria-hidden="true">‹</span> This week
-    <% end %>
-
-    <%# Times and servings moved to the pane headings they describe, and "made
-        it" to the end of the method — so the title gets the whole row. %>
-    <h1 class="min-w-0 flex-1 text-2xl font-bold leading-tight truncate"><%= @recipe.title %></h1>
-  </header>
-
-  <%# The whole reason this screen exists: ingredients and method on screen at
-      the same time, so nobody scrolls back and forth with wet hands. Each pane
-      scrolls on its own; the page itself never does. %>
-  <main class="flex-1 grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] overflow-hidden">
-    <aside class="overflow-y-auto px-7 py-6 border-r border-stone-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+    <div class="flex-1 overflow-y-auto px-7 py-5">
       <div class="flex items-baseline justify-between gap-3 mb-4">
         <h2 class="text-base font-bold uppercase tracking-wide text-stone-400 dark:text-neutral-500">Ingredients</h2>
         <% if @recipe.servings %>
@@ -59,13 +40,33 @@
       <% else %>
         <p class="text-stone-400 dark:text-neutral-500">No ingredients listed.</p>
       <% end %>
-    </aside>
+    </div>
+  </aside>
+
+  <section class="min-w-0 flex-1 flex flex-col">
+    <%# Fixed while the method scrolls under it, so you always know what you're
+        cooking. The way back sits above the title rather than beside it: it's
+        the crumb this recipe hangs off, and stacked it can't be mistaken for a
+        second copy of the host's button — theirs leaves nosh, this goes up to
+        the week. With the row to itself the title wraps instead of truncating. %>
+    <header class="shrink-0 px-7 pt-2 pb-3 border-b border-stone-200 dark:border-neutral-800">
+      <%# py-2.5 rather than the smallest padding that fits the text: this is the
+          only way back inside nosh and it gets hit with a knuckle. %>
+      <%= link_to kitchen_root_path,
+            class: "inline-flex items-center gap-1.5 py-2.5 pe-4 text-base font-semibold text-amber-700 dark:text-amber-400 active:text-amber-900 dark:active:text-amber-200" do %>
+        <span aria-hidden="true">‹</span> This week
+      <% end %>
+
+      <%# Times and servings live in the pane headings that describe them, and
+          "made it" at the end of the method — so this is the title alone. %>
+      <h1 class="text-2xl font-bold leading-tight line-clamp-2"><%= @recipe.title %></h1>
+    </header>
 
     <%# Same target/class names as the main app's show page, so the .step.active
         and .step.done rules in tailwind/application.css apply unchanged. The
-        controller sits on the section rather than the <ol> so the progress
-        readout is inside its scope. %>
-    <section class="overflow-y-auto px-7 py-6" data-controller="step-checklist">
+        controller sits on the scrolling pane rather than the <ol> so the
+        progress readout is inside its scope. %>
+    <div class="flex-1 overflow-y-auto px-7 py-5" data-controller="step-checklist">
       <div class="flex items-baseline justify-between mb-4">
         <h2 class="text-base font-bold uppercase tracking-wide text-stone-400 dark:text-neutral-500">Method</h2>
         <div class="flex items-baseline gap-4 text-base text-stone-400 dark:text-neutral-500">
@@ -98,11 +99,8 @@
       <% end %>
 
       <%# At the bottom of the method, because that's where the cook is when it
-          becomes true. It was in the header when the header was the only fixed
-          thing on the screen, which put "I finished" next to the recipe's name
-          rather than after its last step. Nothing reports how long ago this was
-          last made any more: on the screen you're cooking from, it's a fact
-          about some other day. %>
+          becomes true. Nothing reports how long ago this was last made: on the
+          screen you're cooking from, that's a fact about some other day. %>
       <div class="mt-8" data-controller="made-it" data-made-it-url-value="<%= made_kitchen_recipe_path(@recipe) %>">
         <button type="button"
                 data-action="made-it#mark"
@@ -111,6 +109,6 @@
           ✓ Made it
         </button>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
 </div>

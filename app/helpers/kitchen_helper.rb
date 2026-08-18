@@ -5,9 +5,10 @@ module KitchenHelper
   # Variants are generated on first request and cached from then on.
   KITCHEN_CARD_VARIANT = { resize_to_fill: [ 480, 270 ] }.freeze
 
-  # The recipe screen's corner thumbnail. Small, but the kiosk renders at dpr
-  # 1.5, so the variant is drawn at twice the CSS box.
-  KITCHEN_CORNER_VARIANT = { resize_to_fill: [ 224, 176 ] }.freeze
+  # The recipe screen's photo: the top of the ingredients column, and the
+  # surface the host's back button lands on. Its CSS box is about 281×158, and
+  # the kiosk renders at dpr 1.5, so the variant is drawn at twice that.
+  KITCHEN_CORNER_VARIANT = { resize_to_fill: [ 562, 316 ] }.freeze
 
   def kitchen_card_image(recipe, **options)
     return nil unless recipe.image.attached?
@@ -16,6 +17,7 @@ module KitchenHelper
     image_tag source, loading: "lazy", **options
   end
 
+  # Not lazy, unlike the cards: this one is the first thing on the screen.
   def kitchen_corner_image(recipe, **options)
     return nil unless recipe.image.attached?
 
