@@ -22,16 +22,16 @@ module KitchenHelper
   # `?embed=1` (see Kitchen::BaseController): Home Assistant floats its own
   # close button over the top-left corner of the frame — a 46px circle, inset
   # 14px, wanting 14px of clearance — so nosh has to leave a 14+46+14 = 74px
-  # square there empty. Reserved as the leading padding of whatever sits at the
-  # top of the screen, which on both kitchen screens is a header taller than
-  # 74px already; a shorter one would need vertical room reserved too. Spelled
-  # out rather than interpolated from the arithmetic, because Tailwind only
-  # compiles an arbitrary value it can read literally in the source.
-  EMBED_CORNER_PADDING = "ps-[74px]".freeze
+  # square there empty. Both axes, even though only the horizontal one bites on
+  # today's two screens: the min-height is what stops a future short-header
+  # screen from quietly sliding its content under the button. Spelled out rather
+  # than interpolated from the arithmetic, because Tailwind only compiles an
+  # arbitrary value it can read literally in the source.
+  EMBED_CORNER_RESERVE = "ps-[74px] min-h-[74px]".freeze
 
   # Every kitchen screen's topmost element runs its leading padding through
   # this, so the corner is reserved in one place rather than per view.
-  def kitchen_lead_padding(unembedded)
-    kitchen_embed? ? EMBED_CORNER_PADDING : unembedded
+  def kitchen_corner_reserve(unembedded_padding)
+    kitchen_embed? ? EMBED_CORNER_RESERVE : unembedded_padding
   end
 end

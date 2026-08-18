@@ -1,18 +1,24 @@
 <% content_for :title, "#{@recipe.title} — nosh" %>
 
 <div class="h-full flex flex-col">
-  <header class="shrink-0 flex items-center gap-5 <%= kitchen_lead_padding("ps-6") %> pe-6 py-4 border-b border-stone-200 dark:border-neutral-800 bg-white dark:bg-neutral-900"
+  <header class="shrink-0 flex items-center gap-5 <%= kitchen_corner_reserve("ps-6") %> pe-6 py-4 border-b border-stone-200 dark:border-neutral-800 bg-white dark:bg-neutral-900"
           data-controller="made-it"
           data-made-it-url-value="<%= made_kitchen_recipe_path(@recipe) %>">
-    <%# No browser chrome on the kiosk, so this is the only way back. It stays
-        even when embedded: Home Assistant's corner button closes the whole
-        panel, which isn't the same thing as stepping back to the week. %>
-    <%= link_to kitchen_root_path,
-          class: "shrink-0 flex items-center justify-center w-16 h-16 rounded-2xl bg-stone-100 dark:bg-neutral-800 text-3xl text-stone-600 dark:text-neutral-300 active:bg-stone-200 dark:active:bg-neutral-700" do %>
-      ←<span class="sr-only">Back to this week</span>
-    <% end %>
-
     <div class="min-w-0 flex-1">
+      <%# No browser chrome on the kiosk, so this is the only way back within
+          nosh — but a labelled link above the title rather than a glyph in a
+          box. Embedded, Home Assistant draws its own round back button in the
+          corner, and two bare arrows side by side read as one control repeated.
+          They're two levels rather than two spellings of the same thing: theirs
+          leaves nosh, this one goes up to the week. So this one dresses as part
+          of the recipe's own heading instead of competing with the host's
+          chrome. Trailing padding only — the leading edge is pinned to the
+          reserved corner and mustn't creep back into it. %>
+      <%= link_to kitchen_root_path,
+            class: "inline-flex items-center gap-1.5 py-1.5 pe-3 text-lg font-semibold text-amber-700 dark:text-amber-400 active:text-amber-900 dark:active:text-amber-200" do %>
+        <span aria-hidden="true">‹</span> This week
+      <% end %>
+
       <h1 class="text-3xl font-bold leading-tight truncate"><%= @recipe.title %></h1>
       <div class="flex items-center gap-4 text-lg text-stone-500 dark:text-neutral-400 mt-0.5">
         <% if @recipe.total_time_minutes %>

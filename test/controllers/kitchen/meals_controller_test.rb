@@ -92,9 +92,11 @@ class Kitchen::MealsControllerTest < ActionDispatch::IntegrationTest
   # Home Assistant draws its own close button over the top-left corner when it
   # embeds this screen as a panel, so nosh has to leave that corner empty —
   # 74px of leading padding on the topmost element, and only when asked.
-  test "embed reserves the top-left corner Home Assistant's close button covers" do
+  test "embed reserves the top-left corner Home Assistant's back button covers" do
     get kitchen_root_path(embed: "1")
-    assert_select "header.ps-\\[74px\\]"
+    # Both axes: the min-height is what keeps a short header from letting the
+    # content below it slide under the button.
+    assert_select "header.ps-\\[74px\\].min-h-\\[74px\\]"
 
     get kitchen_root_path
     assert_select "header.ps-\\[74px\\]", count: 0

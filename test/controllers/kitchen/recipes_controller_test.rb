@@ -50,13 +50,20 @@ class Kitchen::RecipesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", kitchen_root_path(theme: "dark")
   end
 
-  # The corner button belongs to Home Assistant and closes the panel; this
-  # screen still needs its own way back to the week, just moved clear of it.
+  # Home Assistant's corner button leaves nosh; this one goes up a level inside
+  # it. Both have to be on screen, so nosh's says where it goes in words rather
+  # than being a second bare arrow next to the host's.
+  test "the way back is a labelled link, not a bare glyph" do
+    get kitchen_recipe_path(@recipe)
+
+    assert_select "a[href=?]", kitchen_root_path, text: /This week/
+  end
+
   test "embed reserves the corner without dropping the way back" do
     get kitchen_recipe_path(@recipe, embed: "1")
 
-    assert_select "header.ps-\\[74px\\]"
-    assert_select "a[href=?]", kitchen_root_path(embed: "1")
+    assert_select "header.ps-\\[74px\\].min-h-\\[74px\\]"
+    assert_select "a[href=?]", kitchen_root_path(embed: "1"), text: /This week/
   end
 
   test "the corner is only reserved when the dashboard asks for it" do
