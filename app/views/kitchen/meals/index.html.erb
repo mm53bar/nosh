@@ -20,7 +20,7 @@
   </header>
 
   <div class="flex-1 overflow-y-auto px-8 pb-8">
-    <div class="grid grid-cols-3 gap-6">
+    <div class="grid grid-cols-4 gap-3">
       <% if @entries.any? %>
         <% @entries.each do |entry| %>
           <%= render "kitchen/recipe_card", recipe: entry.recipe, label: entry.date.strftime("%A") %>

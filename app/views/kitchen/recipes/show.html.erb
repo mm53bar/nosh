@@ -1,34 +1,35 @@
 <% content_for :title, "#{@recipe.title} — nosh" %>
 
 <div class="h-full flex flex-col">
-  <header class="shrink-0 flex items-center gap-5 <%= kitchen_corner_reserve("ps-6") %> pe-6 py-4 border-b border-stone-200 dark:border-neutral-800 bg-white dark:bg-neutral-900"
-          data-controller="made-it"
-          data-made-it-url-value="<%= made_kitchen_recipe_path(@recipe) %>">
-    <%# One row, because the frame is only ~534px tall and a three-line header
-        was eating a quarter of it. The way back reads as the first crumb of a
-        trail rather than a control in the corner: Home Assistant draws its own
-        round back button there, and two bare arrows side by side read as one
-        control repeated. They're two levels — theirs leaves nosh, this goes up
-        to the week — so this one is dressed as part of the title it belongs to.
-        Trailing padding only: the leading edge is pinned to the reserved corner
-        and mustn't creep back into it. %>
+  <%# One row, because the frame is only ~533px tall and a three-line header was
+      eating a quarter of it. Fixed height so the photo can be flush to the top
+      left corner. 78px rather than 74: the bottom border comes out of the
+      photo's height, and the whole 74px square the host's button wants has to
+      fit inside the photo with a little left over. %>
+  <header class="shrink-0 h-[78px] flex items-center gap-5 pe-6 border-b border-stone-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 <%= @recipe.image.attached? ? "" : kitchen_corner_reserve("ps-6") %>">
+    <%# The dish, in the corner Home Assistant floats its back button over. A
+        photo is a better thing to put under that button than the blank square
+        nosh used to reserve — verso does the same with its artwork — and it
+        earns the space back by showing what you're about to cook. Recipes with
+        no image (about one in ten) fall back to reserving the corner empty. %>
+    <% if (photo = kitchen_corner_image(@recipe, class: "w-full h-full object-cover")) %>
+      <figure class="shrink-0 w-[112px] h-full bg-stone-200 dark:bg-neutral-800 overflow-hidden">
+        <%= photo %>
+      </figure>
+    <% end %>
+
+    <%# The way back reads as the first crumb of a trail rather than a control
+        in the corner: two bare arrows side by side read as one control drawn
+        twice. They're two levels — the host's leaves nosh, this goes up to the
+        week — so this one is dressed as part of the title it belongs to. %>
     <%= link_to kitchen_root_path,
-          class: "shrink-0 inline-flex items-center gap-1.5 py-3 pe-1 text-lg font-semibold text-amber-700 dark:text-amber-400 active:text-amber-900 dark:active:text-amber-200" do %>
+          class: "shrink-0 inline-flex items-center gap-1.5 py-3 text-lg font-semibold text-amber-700 dark:text-amber-400 active:text-amber-900 dark:active:text-amber-200" do %>
       <span aria-hidden="true">‹</span> This week
     <% end %>
 
+    <%# Times and servings moved to the pane headings they describe, and "made
+        it" to the end of the method — so the title gets the whole row. %>
     <h1 class="min-w-0 flex-1 text-2xl font-bold leading-tight truncate"><%= @recipe.title %></h1>
-
-    <%# Times and servings moved to the pane headings they describe; what's left
-        beside the button is the state the button changes. %>
-    <span class="shrink-0 text-base text-stone-500 dark:text-neutral-400" data-made-it-target="label"><%= last_made_label(@recipe) %></span>
-
-    <button type="button"
-            data-action="made-it#mark"
-            data-made-it-target="button"
-            class="shrink-0 px-5 py-3 rounded-xl bg-emerald-600 dark:bg-emerald-500 text-white dark:text-neutral-950 text-lg font-semibold active:bg-emerald-700 dark:active:bg-emerald-400 disabled:bg-stone-300 disabled:text-stone-500 dark:disabled:bg-neutral-800 dark:disabled:text-neutral-500">
-      ✓ Made it
-    </button>
   </header>
 
   <%# The whole reason this screen exists: ingredients and method on screen at
@@ -95,6 +96,21 @@
           <%= @recipe.notes %>
         </div>
       <% end %>
+
+      <%# At the bottom of the method, because that's where the cook is when it
+          becomes true. It was in the header when the header was the only fixed
+          thing on the screen, which put "I finished" next to the recipe's name
+          rather than after its last step. Nothing reports how long ago this was
+          last made any more: on the screen you're cooking from, it's a fact
+          about some other day. %>
+      <div class="mt-8" data-controller="made-it" data-made-it-url-value="<%= made_kitchen_recipe_path(@recipe) %>">
+        <button type="button"
+                data-action="made-it#mark"
+                data-made-it-target="button"
+                class="w-full px-6 py-4 rounded-2xl bg-emerald-600 dark:bg-emerald-500 text-white dark:text-neutral-950 text-xl font-semibold active:bg-emerald-700 dark:active:bg-emerald-400 disabled:bg-stone-300 disabled:text-stone-500 dark:disabled:bg-neutral-800 dark:disabled:text-neutral-500">
+          ✓ Made it
+        </button>
+      </div>
     </section>
   </main>
 </div>

@@ -78,11 +78,13 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   top-left corner, so the screen leaves a 74px square there empty in **both** axes
   (`kitchen_corner_reserve`, which owns the geometry for every kitchen screen — don't reach back
   into it with a negative margin). Like `?theme=`, it rides along on every link via
-  `default_url_options`. nosh's own in-app navigation stays inside nosh's content and carries a
-  label (`‹ This week`) rather than being a second bare arrow in the host's corner. The framed
-  viewport is only about **861×534 CSS px**, not 1280×800 — both kitchen headers are one row sized
-  to the 74px reserve, and anything added to them comes straight out of the content below. See
-  `docs/adr/20260817-kitchen-embed-reserves-the-corner.md`.
+  `default_url_options`. The rule is that nothing of nosh's in that square may need reading or
+  tapping — the recipe screen satisfies it with the dish photo under the button rather than with
+  blank space. nosh's own in-app navigation stays inside nosh's content and carries a label
+  (`‹ This week`) rather than being a second bare arrow in the host's corner. The framed viewport
+  is **853×533 CSS px**, not 1280×800: both kitchen headers are one row, and the week's grid is
+  tuned so all seven days clear the fold with 5.5px to spare — re-measure before growing a card or
+  a header. See `docs/adr/20260817-kitchen-embed-reserves-the-corner.md`.
 - Deployment is a single container: web + Solid Queue run together in Puma
   (`config/puma.rb`, gated on `RAILS_ENV=production`) — no separate worker service, no Redis.
 - Testing: Minitest with fixtures. No RSpec, no factories, no mocking library, no

@@ -26,10 +26,14 @@ blank would just look like a layout bug.
 
 ## Decision
 
-`?embed=1` on any `/kitchen` URL means "a back button is being drawn over your corner". When it's
-set, the topmost element on the screen takes 74px of leading padding instead of its usual `ps-6` /
-`ps-8`, **and a 74px min-height**; when it isn't — including for any falsey or absent value —
-nothing changes.
+`?embed=1` on any `/kitchen` URL means "a back button is being drawn over your corner". The rule
+that follows is not *leave 74px blank* but **nothing of nosh's inside that square may need reading
+or tapping**. Blank satisfies it. A photo satisfies it better, and is what the recipe screen does:
+the dish, 112×88, flush in the corner with the host's circle sitting on it — the same move verso
+makes with its artwork. About one recipe in ten has no image; those fall back to the blank square.
+
+For screens with no image to give — the week — the topmost element takes 74px of leading padding
+instead of its usual `ps-8`, **and a 74px min-height**. When `embed` isn't set, nothing changes.
 
 Both axes, even though only the horizontal one bites on today's two screens, whose headers are
 already 96px and ~112px tall. The allowance is a square, and encoding it as one means a future
@@ -55,27 +59,49 @@ in the corner, guest navigation stays inside the guest's content** — which is 
 that they go to different places. It's unconditional rather than embed-only: one screen to reason
 about, and the label reads better than a bare glyph on a standalone kiosk too.
 
-Both kitchen headers are then sized to the reserve itself: **one row, 74px**. The frame is only
-about 861×534 CSS px — measured on the dashboard, not the 1280×800 the panel was first drawn
-against — so the recipe screen's three-line header was spending 26% of the visible height on
-chrome, and the meals screen's two-line header 20%. Times and servings moved to the pane headings
-that describe them (`INGREDIENTS · 4 servings`, `METHOD · 20m`), the last-made label sits beside
-the button that changes it, and the meals screen's date range shares a line with its title. That
-returns 66px to the recipe's two scrolling panes and 36px to the week's card grid.
+Both kitchen headers are then cut to one row. The frame is **853×533 CSS px** — measured from the
+dashboard, not the 1280×800 these screens were first drawn against — so the recipe screen's
+three-line header was spending 26% of the visible height on chrome and the week's two-line header
+20%. Times and servings moved to the pane headings that describe them (`INGREDIENTS · 4 servings`,
+`METHOD · 20m`), and the week's date range shares a line with its title.
+
+**"Made it" moved to the bottom of the method**, past the last step and the notes, because that is
+where the cook is standing when it becomes true. It was in the header only because the header was
+the fixed thing on the screen, which put *I finished* beside the recipe's name instead of after its
+last instruction. The last-made label went with it and did not come back: on the screen you are
+cooking from, when it was last made is a fact about some other day. Nothing else on the kitchen
+screens reports it, and the JSON endpoint still returns the label for callers that want it.
+
+Measured after: the week's header is 74px (the reserve binds), the recipe's 78px — near the floor
+now that only a photo, a crumb and a title are in it, with the extra 4px there because the bottom
+border comes out of the photo and the 74px square has to fit inside what's left.
+
+And with that height back, the week goes to **four cards across, two rows deep** — 188×221 each,
+bottom of row two at 527.5 of 533. All seven days are on screen at once, which is the whole point
+of a screen you glance at while cooking. Header trimming alone could never have done it: the cards
+had to come down ~27% either way.
 
 ## Consequences
 
-- The min-height is load-bearing rather than a guard: both headers now come out under 74px on their
-  own, so when embedded the reserve *is* the header height. Unembedded they're a few px shorter.
+- The corner contract now has two satisfying forms, blank or photographed. A new kitchen screen
+  that has neither is the failure mode to watch for — nothing in code will catch it.
+- The second row of cards clears the fold by **5.5px**. Anything that grows a card — a third meta
+  item, a bigger title size, a taller image ratio — pushes the week back into scrolling. That
+  number is the tripwire; re-measure rather than eyeballing it.
 - Nothing may use a negative leading margin at the top of a kitchen screen — it would reach back
   into the reserved square, which padding alone can't defend. The breadcrumb pads on its trailing
   side only for this reason.
-- Recipe titles truncate earlier now that the title shares its row with the crumb, the last-made
-  label and the button. At counter distance that's the cheapest thing on the row to lose — the cook
-  just tapped the card it came from.
-- The week's cards are unchanged and still show about one and a half rows of a seven-day plan.
-  Fitting a whole week would mean shrinking or dropping the photos, which are what make the grid
-  scannable; that's a separate call from this one.
+- The recipe title gets the rest of the row once the button leaves it — 559px, about 45 characters,
+  where an earlier draft with the button and label alongside gave it 329px. Most titles now fit
+  whole.
+- "Made it" is below the fold on any recipe with more than a few steps. That's the point, but it
+  does mean the one write on this screen is no longer visible on arrival — if a future screen wants
+  it reachable without scrolling, that's a deliberate change, not a bug to fix in passing.
+- Card photos drop from 247×139 to 188×104 and titles to two lines of `text-base`. Small, but food
+  photos survive it — the picture is what makes the grid scannable, so shrinking it beat dropping
+  it for a list.
+- The recipe screen gained a photo it never had: 3px of pane height bought the dish appearing on
+  the screen where you cook it.
 - The 74px is a contract with a value in Home Assistant's dashboard config. If the button there is
   resized, this constant and the ADR have to move with it; nothing in nosh will notice on its own.
 - Verified in headless Chrome at 1280×800 by framing both screens with a mock 46px back circle at
@@ -94,6 +120,10 @@ returns 66px to the recipe's two scrolling panes and 36px to the week's card gri
 - **Drop nosh's back button when embedded** and let Home Assistant's serve both jobs. Rejected on
   the Home Assistant side's own reading: they're two levels of navigation, not two spellings of
   one, and collapsing them would mean leaving the panel entirely to get back to the week.
+- **verso's full-height image column** (a `figure` at 42% width, art bleeding top to bottom, text
+  scrolling beside it). It's where the corner-photo idea came from, but at nosh's scale it would
+  push the ingredient list into a narrow scrolling strip to show a photo nobody reads while
+  cooking. The corner thumbnail takes the same trick at the size this screen can afford.
 - **A generic `?inset-top-left=74` (or a CSS variable) instead of a boolean.** Rejected as
   premature: one embedder, one geometry, and a number in a URL invites a shape nobody has asked
   for. The boolean is easy to widen if a second dashboard ever wants a different corner.

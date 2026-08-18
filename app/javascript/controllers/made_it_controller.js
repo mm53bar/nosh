@@ -9,7 +9,7 @@ import { Controller } from "@hotwired/stimulus"
 // (see ApplicationController), and the result is reported in place — a flash
 // message wouldn't survive a cookie-less redirect either.
 export default class extends Controller {
-  static targets = ["button", "label"]
+  static targets = ["button"]
   static values = { url: String }
 
   async mark() {
@@ -23,9 +23,7 @@ export default class extends Controller {
 
       if (!response.ok) throw new Error(response.status)
 
-      const { label } = await response.json()
       this.buttonTarget.textContent = "✓ Made today"
-      if (this.hasLabelTarget && label) this.labelTarget.textContent = label
     } catch {
       // Nowhere to redirect to and no flash to carry a message, so the button
       // says it itself and lets you try again.

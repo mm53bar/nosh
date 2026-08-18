@@ -1,7 +1,7 @@
 <%# Locals: recipe (required), label (optional overline, e.g. the planned day)
     A whole-card tap target — this gets hit with a knuckle. %>
 <%= link_to kitchen_recipe_path(recipe),
-      class: "group flex flex-col bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden border border-stone-200 dark:border-neutral-800 shadow-sm dark:shadow-none active:border-amber-600 dark:active:border-amber-400 active:shadow-none transition" do %>
+      class: "group flex flex-col bg-white dark:bg-neutral-900 rounded-xl overflow-hidden border border-stone-200 dark:border-neutral-800 shadow-sm dark:shadow-none active:border-amber-600 dark:active:border-amber-400 active:shadow-none transition" do %>
   <div class="aspect-video bg-stone-200 dark:bg-neutral-800 overflow-hidden">
     <% if (image = kitchen_card_image(recipe, class: "w-full h-full object-cover")) %>
       <%= image %>
@@ -10,14 +10,16 @@
     <% end %>
   </div>
 
-  <div class="px-5 py-4 flex-1 flex flex-col gap-1.5">
+  <%# Sized for four across and two rows deep, so a seven-day week is on screen
+      at once — see docs/adr/20260817-kitchen-embed-reserves-the-corner.md. %>
+  <div class="px-4 py-2.5 flex-1 flex flex-col gap-1">
     <% if local_assigns[:label].present? %>
-      <p class="text-base font-bold uppercase tracking-wide text-amber-700 dark:text-amber-400"><%= label %></p>
+      <p class="text-sm font-bold uppercase tracking-wide text-amber-700 dark:text-amber-400"><%= label %></p>
     <% end %>
 
-    <h2 class="text-2xl font-semibold leading-tight line-clamp-2"><%= recipe.title %></h2>
+    <h2 class="text-base font-semibold leading-tight line-clamp-2"><%= recipe.title %></h2>
 
-    <div class="mt-auto pt-2 flex items-center gap-3 text-lg text-stone-500 dark:text-neutral-400">
+    <div class="mt-auto pt-1.5 flex items-center gap-3 text-sm text-stone-500 dark:text-neutral-400">
       <% if recipe.total_time_minutes %>
         <span><%= format_minutes(recipe.total_time_minutes) %></span>
       <% end %>

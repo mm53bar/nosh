@@ -19,6 +19,17 @@ class Kitchen::RecipesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", recipes_path, count: 0
   end
 
+  # You're at the bottom of the method by the time this is true, not at the top
+  # of the page — and how long ago it was last made is a fact about some other
+  # day, not something the screen you're cooking from needs.
+  test "made it sits at the end of the method, and nothing tracks the last time" do
+    get kitchen_recipe_path(@recipe)
+
+    assert_select "section [data-action=?]", "made-it#mark"
+    assert_select "header button", count: 0
+    assert_select "body", text: /Never made|Last made/, count: 0
+  end
+
   test "made records today and reports the new label" do
     @recipe.update!(last_made_on: nil)
 
@@ -69,11 +80,27 @@ class Kitchen::RecipesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", kitchen_root_path, text: /This week/
   end
 
-  test "embed reserves the corner without dropping the way back" do
+  # The corner the host's button covers has to hold nothing that needs reading
+  # or tapping. A photo satisfies that better than blank space, so a recipe with
+  # an image puts the dish there and only an image-less one falls back to the
+  # blank reserve.
+  test "a recipe with a photo puts it in the corner instead of reserving it" do
+    # The bytes are never decoded here — the view only builds a variant URL —
+    # so a stand-in blob is enough to exercise the branch.
+    @recipe.image.attach(io: StringIO.new("not really a jpeg"), filename: "photo.jpg", content_type: "image/jpeg")
+
     get kitchen_recipe_path(@recipe, embed: "1")
 
-    assert_select "header.ps-\\[74px\\].min-h-\\[74px\\]"
+    assert_select "header figure img"
+    assert_select "header.ps-\\[74px\\]", count: 0
     assert_select "a[href=?]", kitchen_root_path(embed: "1"), text: /This week/
+  end
+
+  test "a recipe with no photo falls back to reserving the corner" do
+    get kitchen_recipe_path(@recipe, embed: "1")
+
+    assert_select "header figure", count: 0
+    assert_select "header.ps-\\[74px\\].min-h-\\[74px\\]"
   end
 
   test "the corner is only reserved when the dashboard asks for it" do
