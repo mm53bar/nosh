@@ -49,19 +49,33 @@ reason — there's no address bar on the kiosk to re-enter it with, so a param s
 embedded URL has to survive every tap.
 
 The recipe screen keeps its own way back, but stops spelling it as a corner button: it becomes a
-labelled `‹ This week` link sitting above the recipe title, inside nosh's own heading. The two
-controls are differentiated rather than deduplicated — **host chrome stays a circle in the corner,
-guest navigation stays inside the guest's content** — which is what makes it obvious that they go
-to different places. It's unconditional rather than embed-only: one screen to reason about, and
-the label reads better than a bare glyph on a standalone kiosk too.
+labelled `‹ This week` link on the same line as the recipe title, reading as the first crumb of a
+trail. The two controls are differentiated rather than deduplicated — **host chrome stays a circle
+in the corner, guest navigation stays inside the guest's content** — which is what makes it obvious
+that they go to different places. It's unconditional rather than embed-only: one screen to reason
+about, and the label reads better than a bare glyph on a standalone kiosk too.
+
+Both kitchen headers are then sized to the reserve itself: **one row, 74px**. The frame is only
+about 861×534 CSS px — measured on the dashboard, not the 1280×800 the panel was first drawn
+against — so the recipe screen's three-line header was spending 26% of the visible height on
+chrome, and the meals screen's two-line header 20%. Times and servings moved to the pane headings
+that describe them (`INGREDIENTS · 4 servings`, `METHOD · 20m`), the last-made label sits beside
+the button that changes it, and the meals screen's date range shares a line with its title. That
+returns 66px to the recipe's two scrolling panes and 36px to the week's card grid.
 
 ## Consequences
 
-- The recipe header is ~40px taller than it was, since the way back moved from beside the title to
-  above it. The two scrolling panes lose that much; at 800px they have it to give.
+- The min-height is load-bearing rather than a guard: both headers now come out under 74px on their
+  own, so when embedded the reserve *is* the header height. Unembedded they're a few px shorter.
 - Nothing may use a negative leading margin at the top of a kitchen screen — it would reach back
   into the reserved square, which padding alone can't defend. The breadcrumb pads on its trailing
   side only for this reason.
+- Recipe titles truncate earlier now that the title shares its row with the crumb, the last-made
+  label and the button. At counter distance that's the cheapest thing on the row to lose — the cook
+  just tapped the card it came from.
+- The week's cards are unchanged and still show about one and a half rows of a seven-day plan.
+  Fitting a whole week would mean shrinking or dropping the photos, which are what make the grid
+  scannable; that's a separate call from this one.
 - The 74px is a contract with a value in Home Assistant's dashboard config. If the button there is
   resized, this constant and the ADR have to move with it; nothing in nosh will notice on its own.
 - Verified in headless Chrome at 1280×800 by framing both screens with a mock 46px back circle at
@@ -83,6 +97,11 @@ the label reads better than a bare glyph on a standalone kiosk too.
 - **A generic `?inset-top-left=74` (or a CSS variable) instead of a boolean.** Rejected as
   premature: one embedder, one geometry, and a number in a URL invites a shape nobody has asked
   for. The boolean is easy to widen if a second dashboard ever wants a different corner.
-- **Shifting the whole page right rather than just the header.** Rejected: it costs 74px of a
-  1280px screen on every row, on a layout whose entire point is fitting ingredients and method
-  on at once.
+- **Shifting the whole page right rather than just the header.** Rejected: it costs 74px of the
+  frame's width on every row, on a layout whose entire point is fitting ingredients and method on
+  at once.
+- **Letting Home Assistant reserve the strip outside the iframe**, by sizing the frame 74px shorter
+  and drawing the button above it. Entirely possible and about two minutes of work on that side —
+  but it spends 14% of the 534px height permanently, on every embedded view, whether or not the
+  guest needs it. A safe-area contract costs nothing for a guest we control, which nosh is. The
+  strip stays the right answer for a guest that can't be changed.

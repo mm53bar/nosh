@@ -79,7 +79,9 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   (`kitchen_corner_reserve`, which owns the geometry for every kitchen screen — don't reach back
   into it with a negative margin). Like `?theme=`, it rides along on every link via
   `default_url_options`. nosh's own in-app navigation stays inside nosh's content and carries a
-  label (`‹ This week`) rather than being a second bare arrow in the host's corner. See
+  label (`‹ This week`) rather than being a second bare arrow in the host's corner. The framed
+  viewport is only about **861×534 CSS px**, not 1280×800 — both kitchen headers are one row sized
+  to the 74px reserve, and anything added to them comes straight out of the content below. See
   `docs/adr/20260817-kitchen-embed-reserves-the-corner.md`.
 - Deployment is a single container: web + Solid Queue run together in Puma
   (`config/puma.rb`, gated on `RAILS_ENV=production`) — no separate worker service, no Redis.

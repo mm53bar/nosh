@@ -50,6 +50,16 @@ class Kitchen::RecipesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", kitchen_root_path(theme: "dark")
   end
 
+  # The framed viewport is ~534px tall, so the header is one row and the numbers
+  # live in the panes they describe rather than in a line of their own.
+  test "servings and time sit with the ingredients and the method" do
+    get kitchen_recipe_path(@recipe)
+
+    assert_select "aside", text: /4 servings/
+    assert_select "section", text: /30m/
+    assert_select "header", text: /4 servings/, count: 0
+  end
+
   # Home Assistant's corner button leaves nosh; this one goes up a level inside
   # it. Both have to be on screen, so nosh's says where it goes in words rather
   # than being a second bare arrow next to the host's.

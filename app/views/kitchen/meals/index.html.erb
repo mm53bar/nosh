@@ -1,21 +1,22 @@
 <% content_for :title, "Kitchen — nosh" %>
 
 <div class="h-full flex flex-col">
-  <header class="shrink-0 <%= kitchen_corner_reserve("ps-8") %> pe-8 pt-6 pb-4 flex items-end justify-between gap-6">
-    <div>
-      <% if @entries.any? %>
-        <h1 class="text-4xl font-bold">This week</h1>
-        <p class="text-lg text-stone-500 dark:text-neutral-400 mt-1">
-          <%= @start_date.strftime("%b %-d") %> – <%= @end_date.strftime("%b %-d") %>
-        </p>
-      <% else %>
-        <h1 class="text-4xl font-bold">Nothing planned</h1>
-        <%# Labelled as suggestions, not dressed up as a plan — an empty week is
-            the normal state here, and the screen shouldn't imply otherwise. %>
-        <p class="text-lg text-stone-500 dark:text-neutral-400 mt-1">Suggestions: dinners you haven't cooked yet</p>
-      <% end %>
-    </div>
-    <p class="text-lg text-stone-400 dark:text-neutral-500"><%= Date.current.strftime("%A") %></p>
+  <%# Title and subtitle share a line rather than stacking: the frame is only
+      ~534px tall, and every row spent on chrome is a row of cards nobody can
+      see without scrolling. %>
+  <header class="shrink-0 <%= kitchen_corner_reserve("ps-8") %> pe-8 py-4 flex items-baseline gap-4">
+    <% if @entries.any? %>
+      <h1 class="text-3xl font-bold shrink-0">This week</h1>
+      <p class="text-lg text-stone-500 dark:text-neutral-400 truncate">
+        <%= @start_date.strftime("%b %-d") %> – <%= @end_date.strftime("%b %-d") %>
+      </p>
+    <% else %>
+      <h1 class="text-3xl font-bold shrink-0">Nothing planned</h1>
+      <%# Labelled as suggestions, not dressed up as a plan — an empty week is
+          the normal state here, and the screen shouldn't imply otherwise. %>
+      <p class="text-lg text-stone-500 dark:text-neutral-400 truncate">Suggestions: dinners you haven't cooked yet</p>
+    <% end %>
+    <p class="text-lg text-stone-400 dark:text-neutral-500 ms-auto shrink-0"><%= Date.current.strftime("%A") %></p>
   </header>
 
   <div class="flex-1 overflow-y-auto px-8 pb-8">

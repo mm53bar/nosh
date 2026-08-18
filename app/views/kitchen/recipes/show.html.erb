@@ -4,37 +4,29 @@
   <header class="shrink-0 flex items-center gap-5 <%= kitchen_corner_reserve("ps-6") %> pe-6 py-4 border-b border-stone-200 dark:border-neutral-800 bg-white dark:bg-neutral-900"
           data-controller="made-it"
           data-made-it-url-value="<%= made_kitchen_recipe_path(@recipe) %>">
-    <div class="min-w-0 flex-1">
-      <%# No browser chrome on the kiosk, so this is the only way back within
-          nosh — but a labelled link above the title rather than a glyph in a
-          box. Embedded, Home Assistant draws its own round back button in the
-          corner, and two bare arrows side by side read as one control repeated.
-          They're two levels rather than two spellings of the same thing: theirs
-          leaves nosh, this one goes up to the week. So this one dresses as part
-          of the recipe's own heading instead of competing with the host's
-          chrome. Trailing padding only — the leading edge is pinned to the
-          reserved corner and mustn't creep back into it. %>
-      <%= link_to kitchen_root_path,
-            class: "inline-flex items-center gap-1.5 py-1.5 pe-3 text-lg font-semibold text-amber-700 dark:text-amber-400 active:text-amber-900 dark:active:text-amber-200" do %>
-        <span aria-hidden="true">‹</span> This week
-      <% end %>
+    <%# One row, because the frame is only ~534px tall and a three-line header
+        was eating a quarter of it. The way back reads as the first crumb of a
+        trail rather than a control in the corner: Home Assistant draws its own
+        round back button there, and two bare arrows side by side read as one
+        control repeated. They're two levels — theirs leaves nosh, this goes up
+        to the week — so this one is dressed as part of the title it belongs to.
+        Trailing padding only: the leading edge is pinned to the reserved corner
+        and mustn't creep back into it. %>
+    <%= link_to kitchen_root_path,
+          class: "shrink-0 inline-flex items-center gap-1.5 py-3 pe-1 text-lg font-semibold text-amber-700 dark:text-amber-400 active:text-amber-900 dark:active:text-amber-200" do %>
+      <span aria-hidden="true">‹</span> This week
+    <% end %>
 
-      <h1 class="text-3xl font-bold leading-tight truncate"><%= @recipe.title %></h1>
-      <div class="flex items-center gap-4 text-lg text-stone-500 dark:text-neutral-400 mt-0.5">
-        <% if @recipe.total_time_minutes %>
-          <span><%= format_minutes(@recipe.total_time_minutes) %></span>
-        <% end %>
-        <% if @recipe.servings %>
-          <span><%= @recipe.servings %> servings</span>
-        <% end %>
-        <span data-made-it-target="label"><%= last_made_label(@recipe) %></span>
-      </div>
-    </div>
+    <h1 class="min-w-0 flex-1 text-2xl font-bold leading-tight truncate"><%= @recipe.title %></h1>
+
+    <%# Times and servings moved to the pane headings they describe; what's left
+        beside the button is the state the button changes. %>
+    <span class="shrink-0 text-base text-stone-500 dark:text-neutral-400" data-made-it-target="label"><%= last_made_label(@recipe) %></span>
 
     <button type="button"
             data-action="made-it#mark"
             data-made-it-target="button"
-            class="shrink-0 px-7 py-5 rounded-2xl bg-emerald-600 dark:bg-emerald-500 text-white dark:text-neutral-950 text-xl font-semibold active:bg-emerald-700 dark:active:bg-emerald-400 disabled:bg-stone-300 disabled:text-stone-500 dark:disabled:bg-neutral-800 dark:disabled:text-neutral-500">
+            class="shrink-0 px-5 py-3 rounded-xl bg-emerald-600 dark:bg-emerald-500 text-white dark:text-neutral-950 text-lg font-semibold active:bg-emerald-700 dark:active:bg-emerald-400 disabled:bg-stone-300 disabled:text-stone-500 dark:disabled:bg-neutral-800 dark:disabled:text-neutral-500">
       ✓ Made it
     </button>
   </header>
@@ -44,7 +36,12 @@
       scrolls on its own; the page itself never does. %>
   <main class="flex-1 grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] overflow-hidden">
     <aside class="overflow-y-auto px-7 py-6 border-r border-stone-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
-      <h2 class="text-base font-bold uppercase tracking-wide text-stone-400 dark:text-neutral-500 mb-4">Ingredients</h2>
+      <div class="flex items-baseline justify-between gap-3 mb-4">
+        <h2 class="text-base font-bold uppercase tracking-wide text-stone-400 dark:text-neutral-500">Ingredients</h2>
+        <% if @recipe.servings %>
+          <p class="text-base text-stone-400 dark:text-neutral-500"><%= @recipe.servings %> servings</p>
+        <% end %>
+      </div>
       <% if @recipe.ingredients.any? %>
         <ul class="space-y-3">
           <% @recipe.ingredients.each do |ingredient| %>
@@ -70,7 +67,12 @@
     <section class="overflow-y-auto px-7 py-6" data-controller="step-checklist">
       <div class="flex items-baseline justify-between mb-4">
         <h2 class="text-base font-bold uppercase tracking-wide text-stone-400 dark:text-neutral-500">Method</h2>
-        <p class="text-base text-stone-400 dark:text-neutral-500" data-step-checklist-target="progress"></p>
+        <div class="flex items-baseline gap-4 text-base text-stone-400 dark:text-neutral-500">
+          <% if @recipe.total_time_minutes %>
+            <p><%= format_minutes(@recipe.total_time_minutes) %></p>
+          <% end %>
+          <p data-step-checklist-target="progress"></p>
+        </div>
       </div>
 
       <% if @recipe.steps.any? %>
