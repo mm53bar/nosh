@@ -6,7 +6,13 @@
 #
 default: &default
   adapter: sqlite3
-  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  # Sized for Puma's request threads *plus* Solid Queue's, which run in the same
+  # process (config/puma.rb) — config/queue.yml gives workers 3 threads, and a
+  # job touching a model checks out a primary connection even though Solid
+  # Queue's own tables live in the queue database. 3 request + 3 job threads
+  # against the stock 5 was an overcommit. `max_connections` is the Rails 8.1
+  # key; `pool` is its deprecated alias.
+  max_connections: <%= ENV.fetch("RAILS_MAX_CONNECTIONS") { Integer(ENV.fetch("RAILS_MAX_THREADS", 3)) + 6 } %>
   timeout: 5000
 
 development:

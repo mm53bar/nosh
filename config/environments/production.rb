@@ -50,6 +50,15 @@ Rails.application.configure do
   config.cache_store = :solid_cache_store
 
   # Replace the default in-process and non-durable queuing backend for Active Job.
+  # Thruster enables X-Sendfile by default and Rack::Sendfile is already in the
+  # middleware stack; only this half was missing, so the mechanism sat idle at
+  # both ends. With it set, Active Storage's disk controller hands Rack a path
+  # (Rack::Files::Iterator aliases #to_path) and Thruster serves the file with
+  # sendfile(2) — Puma is released once the headers are written, whatever the
+  # file size. Production only: dev and test have no proxy to honour the header,
+  # and Rack::Sendfile would blank the body.
+  config.action_dispatch.x_sendfile_header = "X-Sendfile"
+
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = { database: { writing: :queue } }
 
