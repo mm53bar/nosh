@@ -13,7 +13,7 @@ module Kitchen
     # doesn't report a colour scheme, which is what the Echo Show may well do.
     THEMES = %w[light dark].freeze
 
-    helper_method :kitchen_theme
+    helper_method :kitchen_theme, :kitchen_embed?
 
     private
 
@@ -21,11 +21,23 @@ module Kitchen
         THEMES.find { |theme| theme == params[:theme] } || "auto"
       end
 
-      # There's no browser chrome on the kiosk and no way to re-type a URL, so a
-      # theme set on the dashboard's URL has to survive every tap. Home Assistant
-      # only ever needs to put `?theme=` on the one page it embeds.
+      # `?embed=1` means the dashboard draws its own close button over nosh's
+      # top-left corner, so this screen has to leave that corner empty — see
+      # KitchenHelper::EMBED_CORNER for the geometry. Off unless asked for:
+      # opened directly in a browser there's no button to make room for, and a
+      # blank corner would just look like a layout bug.
+      def kitchen_embed?
+        ActiveModel::Type::Boolean.new.cast(params[:embed]) || false
+      end
+
+      # There's no browser chrome on the kiosk and no way to re-type a URL, so
+      # anything set on the dashboard's URL has to survive every tap. Home
+      # Assistant only ever needs to put these on the one page it embeds.
       def default_url_options
-        kitchen_theme == "auto" ? {} : { theme: kitchen_theme }
+        options = {}
+        options[:theme] = kitchen_theme unless kitchen_theme == "auto"
+        options[:embed] = "1" if kitchen_embed?
+        options
       end
   end
 end

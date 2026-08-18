@@ -49,4 +49,20 @@ class Kitchen::RecipesControllerTest < ActionDispatch::IntegrationTest
     assert_select "html.theme-dark"
     assert_select "a[href=?]", kitchen_root_path(theme: "dark")
   end
+
+  # The corner button belongs to Home Assistant and closes the panel; this
+  # screen still needs its own way back to the week, just moved clear of it.
+  test "embed reserves the corner without dropping the way back" do
+    get kitchen_recipe_path(@recipe, embed: "1")
+
+    assert_select "header.ps-\\[74px\\]"
+    assert_select "a[href=?]", kitchen_root_path(embed: "1")
+  end
+
+  test "the corner is only reserved when the dashboard asks for it" do
+    get kitchen_recipe_path(@recipe)
+
+    assert_select "header.ps-\\[74px\\]", count: 0
+    assert_select "header.ps-6"
+  end
 end

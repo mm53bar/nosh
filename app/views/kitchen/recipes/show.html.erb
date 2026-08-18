@@ -1,10 +1,12 @@
 <% content_for :title, "#{@recipe.title} — nosh" %>
 
 <div class="h-full flex flex-col">
-  <header class="shrink-0 flex items-center gap-5 px-6 py-4 border-b border-stone-200 dark:border-neutral-800 bg-white dark:bg-neutral-900"
+  <header class="shrink-0 flex items-center gap-5 <%= kitchen_lead_padding("ps-6") %> pe-6 py-4 border-b border-stone-200 dark:border-neutral-800 bg-white dark:bg-neutral-900"
           data-controller="made-it"
           data-made-it-url-value="<%= made_kitchen_recipe_path(@recipe) %>">
-    <%# No browser chrome on the kiosk, so this is the only way back. %>
+    <%# No browser chrome on the kiosk, so this is the only way back. It stays
+        even when embedded: Home Assistant's corner button closes the whole
+        panel, which isn't the same thing as stepping back to the week. %>
     <%= link_to kitchen_root_path,
           class: "shrink-0 flex items-center justify-center w-16 h-16 rounded-2xl bg-stone-100 dark:bg-neutral-800 text-3xl text-stone-600 dark:text-neutral-300 active:bg-stone-200 dark:active:bg-neutral-700" do %>
       ←<span class="sr-only">Back to this week</span>

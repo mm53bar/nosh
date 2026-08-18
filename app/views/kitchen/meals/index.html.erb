@@ -1,7 +1,7 @@
 <% content_for :title, "Kitchen — nosh" %>
 
 <div class="h-full flex flex-col">
-  <header class="shrink-0 px-8 pt-6 pb-4 flex items-end justify-between gap-6">
+  <header class="shrink-0 <%= kitchen_lead_padding("ps-8") %> pe-8 pt-6 pb-4 flex items-end justify-between gap-6">
     <div>
       <% if @entries.any? %>
         <h1 class="text-4xl font-bold">This week</h1>

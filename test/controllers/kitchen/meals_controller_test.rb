@@ -89,6 +89,26 @@ class Kitchen::MealsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", kitchen_recipe_path(recipes(:one), theme: "dark")
   end
 
+  # Home Assistant draws its own close button over the top-left corner when it
+  # embeds this screen as a panel, so nosh has to leave that corner empty —
+  # 74px of leading padding on the topmost element, and only when asked.
+  test "embed reserves the top-left corner Home Assistant's close button covers" do
+    get kitchen_root_path(embed: "1")
+    assert_select "header.ps-\\[74px\\]"
+
+    get kitchen_root_path
+    assert_select "header.ps-\\[74px\\]", count: 0
+    assert_select "header.ps-8"
+  end
+
+  test "embed carries into the recipe it links to, alongside the theme" do
+    MealPlanEntry.update_all(date: Date.current)
+
+    get kitchen_root_path(embed: "1", theme: "dark")
+
+    assert_select "a[href=?]", kitchen_recipe_path(recipes(:one), theme: "dark", embed: "1")
+  end
+
   test "suggestions exclude non-dinners" do
     MealPlanEntry.delete_all
     Recipe.create!(title: "Morning Toast", meal_type: "Breakfast")
