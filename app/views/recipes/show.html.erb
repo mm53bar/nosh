@@ -90,7 +90,7 @@
       <div class="flex items-center justify-between flex-wrap gap-2">
         <p class="text-xs font-bold uppercase tracking-wide text-stone-400">Method</p>
         <% if @recipe.steps.any? %>
-          <label class="inline-flex items-center gap-2 text-sm text-stone-500 cursor-pointer select-none" data-controller="wake-lock">
+          <label class="inline-flex items-center gap-2 text-sm text-stone-500 cursor-pointer select-none" data-controller="wake-lock" hidden>
             <span class="relative inline-block w-9 h-5 shrink-0">
               <input type="checkbox" class="peer sr-only" data-wake-lock-target="toggle" data-action="change->wake-lock#toggle">
               <span class="absolute inset-0 rounded-full bg-stone-300 peer-checked:bg-[#27ae60] transition-colors pointer-events-none"></span>

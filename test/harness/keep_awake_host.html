@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Keep awake — fake host harness</title>
+<!--
+  A stand-in for the Home Assistant kiosk page, for exercising nosh's half of the
+  "keep awake" contract without an Echo Show. Not part of the test suite: the
+  other party to this contract lives in another repo and can't be imported, so
+  this page is the executable spec for it. See
+  docs/adr/20260821-keep-awake-is-two-backends.md.
+
+  Serve it over loopback — nosh's CSP frame-ancestors allows http://localhost:*
+  and http://127.0.0.1:*, but a file:// page is an opaque origin and gets an
+  empty box with no obvious cause:
+
+      cd test/harness && python3 -m http.server 8000
+      open http://localhost:8000/keep_awake_host.html
+
+  with nosh itself on http://localhost:3000 (bin/dev).
+
+  What to look for:
+    * Ack on   — the switch appears, and "on" lands every renew_seconds.
+    * Ack off  — the switch never appears (no wake lock in a cross-origin frame,
+                 no host), rather than appearing and doing nothing. Trap 3.
+    * Ack late — the switch appears when the ack arrives, proving nosh keeps
+                 listening past its last "hello" retry.
+    * LEASE     — goes stale on its own if renewal stops; that's the guarantee
+                  that a dead frame can't wedge the kiosk awake.
+
+  The frame is 853x533 because that's the kiosk's real CSS viewport (its
+  screenshots come back 1280x800 at dpr 1.5), so this is also where to check the
+  switch is big enough for a floury finger.
+-->
+<style>
+  :root { color-scheme: dark; font-family: ui-monospace, SFMono-Regular, Menlo, monospace }
+  body { margin: 0; background: #16161a; color: #d6d6dd; display: flex; gap: 18px; padding: 18px; align-items: flex-start }
+  iframe { width: 853px; height: 533px; border: 2px solid #3a3a44; border-radius: 10px; background: #fff; flex: none }
+  aside { flex: 1; min-width: 340px; display: flex; flex-direction: column; gap: 12px }
+  fieldset { border: 1px solid #3a3a44; border-radius: 8px; padding: 10px 12px; margin: 0 }
+  legend { padding: 0 6px; color: #8d8d99; font-size: 12px; text-transform: uppercase; letter-spacing: .08em }
+  label { display: block; font-size: 13px; line-height: 2 }
+  input[type=text], input[type=number] { background: #0f0f12; color: inherit; border: 1px solid #3a3a44; border-radius: 5px; padding: 4px 6px; font: inherit; font-size: 13px }
+  input[type=text] { width: 100% }
+  #lease { font-size: 26px; font-weight: 700; letter-spacing: .02em }
+  .held { color: #27ae60 } .idle { color: #6b6b77 } .stale { color: #e0644a }
+  #log { flex: 1; min-height: 240px; overflow-y: auto; background: #0f0f12; border: 1px solid #3a3a44; border-radius: 8px; padding: 8px 10px; font-size: 12px; line-height: 1.7; white-space: pre-wrap }
+  .in { color: #6cb6ff } .out { color: #b58cf0 } .note { color: #8d8d99 }
+  button { background: #26262e; color: inherit; border: 1px solid #4a4a56; border-radius: 6px; padding: 5px 10px; font: inherit; font-size: 13px; cursor: pointer }
+</style>
+</head>
+<body>
+<iframe id="frame" title="nosh, framed"></iframe>
+
+<aside>
+  <fieldset>
+    <legend>Guest</legend>
+    <label>URL <input type="text" id="src" value="http://localhost:3000/kitchen/recipes/1?embed=1&theme=dark"></label>
+    <button id="load">Load / reload frame</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>Host behaviour</legend>
+    <label><input type="radio" name="mode" value="on" checked> Ack — answer "hello" straight away</label>
+    <label><input type="radio" name="mode" value="off"> Silent — never answer (switch must stay hidden)</label>
+    <label><input type="radio" name="mode" value="late"> Late — answer after
+      <input type="number" id="delay" value="3" min="0" max="60" size="3"> s, ignoring the hellos</label>
+    <label>renew_seconds <input type="number" id="renew" value="30" min="1" max="600" size="4">
+           lease_seconds <input type="number" id="lease_s" value="90" min="1" max="600" size="4"></label>
+    <p class="note" style="font-size:12px;margin:6px 0 0">Drop renew_seconds to ~3 to watch renewal without waiting.</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Lease</legend>
+    <div id="lease" class="idle">IDLE</div>
+    <div class="note" id="leaseDetail" style="font-size:12px">no hold</div>
+  </fieldset>
+
+  <div id="log"></div>
+</aside>
+
+<script>
+  const CHANNEL = "ks-keep-awake", VERSION = 1
+  const $ = (id) => document.getElementById(id)
+  const mode = () => document.querySelector("input[name=mode]:checked").value
+
+  let lastOn = null      // when the newest "on" arrived
+  let released = true    // an explicit "off" was the last thing we heard
+
+  const log = (cls, text) => {
+    const at = new Date().toLocaleTimeString("en-CA", { hour12: false }) + "." +
+      String(new Date().getMilliseconds()).padStart(3, "0")
+    const line = document.createElement("div")
+    line.className = cls
+    line.textContent = `${at}  ${text}`
+    $("log").append(line)
+    $("log").scrollTop = $("log").scrollHeight
+  }
+
+  $("load").addEventListener("click", () => {
+    lastOn = null; released = true
+    $("log").replaceChildren()
+    log("note", "— frame reloading —")
+    $("frame").src = $("src").value
+  })
+  $("load").click()
+
+  // The real host checks event.origin against an allowlist. This one only logs
+  // it: the point here is nosh's side, and a wrong allowlist would look exactly
+  // like a silent host, which is already a mode above.
+  window.addEventListener("message", (event) => {
+    const d = event.data
+    if (!d || d.type !== CHANNEL) return
+    log("in", `← ${d.action}${d.v !== VERSION ? ` (v=${d.v}!)` : ""}  from ${event.origin}`)
+
+    if (d.action === "hello") {
+      if (mode() === "off") return log("note", "   (silent: not answering)")
+      if (mode() === "late") return log("note", "   (late: answering on the timer instead)")
+      ack(event.source, event.origin)
+    }
+
+    if (d.action === "on") { lastOn = performance.now(); released = false }
+    if (d.action === "off") { released = true }
+  })
+
+  function ack(source, origin) {
+    const message = {
+      type: CHANNEL, v: VERSION, action: "available",
+      renew_seconds: Number($("renew").value), lease_seconds: Number($("lease_s").value)
+    }
+    ;(source || $("frame").contentWindow).postMessage(message, origin && origin !== "null" ? origin : "*")
+    log("out", `→ available  renew=${message.renew_seconds}s lease=${message.lease_seconds}s`)
+  }
+
+  // "Late" mode answers unprompted, which is also the case worth proving: the
+  // host's listener may be installed after nosh has given up asking.
+  let lateTimer = null
+  document.querySelectorAll("input[name=mode]").forEach((radio) => radio.addEventListener("change", () => {
+    clearTimeout(lateTimer)
+    if (mode() !== "late") return
+    const secs = Number($("delay").value)
+    log("note", `late mode armed: acking unprompted in ${secs}s`)
+    lateTimer = setTimeout(() => ack(null, null), secs * 1000)
+  }))
+
+  // The lease is the whole safety story, so show it the way the host sees it:
+  // held only while the newest "on" is younger than lease_seconds.
+  setInterval(() => {
+    const el = $("lease"), detail = $("leaseDetail")
+    if (lastOn === null) { el.className = "idle"; el.textContent = "IDLE"; detail.textContent = "no hold"; return }
+
+    const age = (performance.now() - lastOn) / 1000
+    const lease = Number($("lease_s").value)
+    if (released) {
+      el.className = "idle"; el.textContent = "RELEASED"
+      detail.textContent = `explicit "off" — kiosk free (${age.toFixed(1)}s ago)`
+    } else if (age <= lease) {
+      el.className = "held"; el.textContent = "HELD"
+      detail.textContent = `newest "on" ${age.toFixed(1)}s old, expires at ${lease}s`
+    } else {
+      el.className = "stale"; el.textContent = "EXPIRED"
+      detail.textContent = `no "on" for ${age.toFixed(1)}s — renewal stopped`
+    }
+  }, 100)
+</script>
+</body>
+</html>

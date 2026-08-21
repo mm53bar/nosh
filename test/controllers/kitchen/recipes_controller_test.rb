@@ -102,6 +102,31 @@ class Kitchen::RecipesControllerTest < ActionDispatch::IntegrationTest
     assert_select "aside figure img", count: 0
   end
 
+  # The switch that stops the kiosk navigating away mid-recipe. It's the last
+  # thing in the Method row because the progress readout next to it changes
+  # width as steps get ticked off, and a control that moves is a control you
+  # mis-tap with a floury finger. See
+  # docs/adr/20260821-keep-awake-is-two-backends.md.
+  test "the method row ends with the keep-awake switch" do
+    get kitchen_recipe_path(@recipe)
+
+    assert_select "[data-controller=wake-lock]", text: /Keep awake/ do
+      assert_select "input[type=checkbox][data-wake-lock-target=toggle][data-action=?]", "change->wake-lock#toggle"
+    end
+    assert_select "div.flex > *:last-child[data-controller=wake-lock]"
+  end
+
+  # Same rule the browse UI's show page has always had: no steps, nothing to
+  # hold the screen for.
+  test "no keep-awake switch on a recipe with no steps" do
+    @recipe.steps.destroy_all
+
+    get kitchen_recipe_path(@recipe)
+
+    assert_response :success
+    assert_select "[data-controller=wake-lock]", count: 0
+  end
+
   # Nothing on this screen is indented for the button, embedded or not — the
   # photo is what keeps the corner clear.
   test "the recipe screen reserves no blank corner either way" do
@@ -110,5 +135,13 @@ class Kitchen::RecipesControllerTest < ActionDispatch::IntegrationTest
 
     get kitchen_recipe_path(@recipe)
     assert_select ".ps-\\[74px\\]", count: 0
+  end
+
+  # Revealed by the controller once a backend answers, so a bundle that never
+  # loads leaves no switch rather than one that does nothing.
+  test "the keep-awake switch is hidden until JS reveals it" do
+    get kitchen_recipe_path(@recipe)
+
+    assert_select "[data-controller=wake-lock][hidden]"
   end
 end

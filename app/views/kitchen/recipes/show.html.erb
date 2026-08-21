@@ -67,13 +67,40 @@
         controller sits on the scrolling pane rather than the <ol> so the
         progress readout is inside its scope. %>
     <div class="flex-1 overflow-y-auto px-7 py-5" data-controller="step-checklist">
-      <div class="flex items-baseline justify-between mb-4">
+      <%# items-center, not items-baseline: the switch below is a 28px box with no
+          text in it, and an inline-flex box takes its baseline from its first
+          item — so baseline alignment would hang "Keep awake" well below the
+          time. Everything in this row is the same size, so centring reads the
+          same as the baseline it replaces. The browse UI's row does likewise. %>
+      <div class="flex items-center justify-between mb-4">
         <h2 class="text-base font-bold uppercase tracking-wide text-stone-400 dark:text-neutral-500">Method</h2>
-        <div class="flex items-baseline gap-4 text-base text-stone-400 dark:text-neutral-500">
+        <div class="flex items-center gap-4 text-base text-stone-400 dark:text-neutral-500">
           <% if @recipe.total_time_minutes %>
             <p><%= format_minutes(@recipe.total_time_minutes) %></p>
           <% end %>
           <p data-step-checklist-target="progress"></p>
+
+          <%# Last in the row on purpose. The progress readout beside it goes
+              from empty to "3 of 8 steps complete" to "All done!", and anything
+              to the left of that would slide sideways under a floury finger
+              part-way through cooking. Only where there are steps to hold the
+              screen for, matching the browse UI's show page.
+
+              On the kiosk this drives a lease relayed by the host page rather
+              than a Screen Wake Lock — one switch, two backends, sorted out in
+              wake_lock_controller.js. The control hides itself if neither is
+              available, so opened in a plain browser it still works and framed
+              without a listening host it's absent rather than dead. %>
+          <% if @recipe.steps.any? %>
+            <label class="inline-flex items-center gap-2.5 py-2.5 cursor-pointer select-none" data-controller="wake-lock" hidden>
+              <span class="relative inline-block w-12 h-7 shrink-0">
+                <input type="checkbox" class="peer sr-only" data-wake-lock-target="toggle" data-action="change->wake-lock#toggle">
+                <span class="absolute inset-0 rounded-full bg-stone-300 dark:bg-neutral-700 peer-checked:bg-[#27ae60] transition-colors pointer-events-none"></span>
+                <span class="absolute left-1 top-1 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5 pointer-events-none"></span>
+              </span>
+              Keep awake
+            </label>
+          <% end %>
         </div>
       </div>
 

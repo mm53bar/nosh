@@ -85,6 +85,16 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   is **853×533 CSS px**, not 1280×800: both kitchen headers are one row, and the week's grid is
   tuned so all seven days clear the fold with 5.5px to spare — re-measure before growing a card or
   a header. See `docs/adr/20260817-kitchen-embed-reserves-the-corner.md`.
+- **"Keep awake" is one switch over two backends**, and `checked` means "at least one hold is
+  active" — a Screen Wake Lock for an iPad, and a lease relayed by the host page for the kiosk,
+  whose app-level return-home timer no web API can reach. Inside the frame the wake lock always
+  fails, so never let a failing backend un-check the switch, and test availability by *acquiring*
+  one rather than checking `"wakeLock" in navigator` (which is true there and lies). The switch
+  is gated on capability, never on `?embed=1`, and renewal deliberately continues while the page
+  is hidden. The message contract is shared with the `homeassistant` repo, so it's versioned and
+  can't be changed one-sidedly; `test/harness/keep_awake_host.html` is a fake host to drive it
+  against, outside the suite on purpose. See
+  `docs/adr/20260821-keep-awake-is-two-backends.md`.
 - Deployment is a single container: web + Solid Queue run together in Puma
   (`config/puma.rb`, gated on `RAILS_ENV=production`) — no separate worker service, no Redis.
 - Testing: Minitest with fixtures. No RSpec, no factories, no mocking library, no

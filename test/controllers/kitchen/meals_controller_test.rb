@@ -119,4 +119,13 @@ class Kitchen::MealsControllerTest < ActionDispatch::IntegrationTest
 
     assert_no_match(/Morning Toast/, response.body)
   end
+
+  # The week's grid is a glance-and-leave screen, so it keeps the kiosk's own
+  # 120s return-home behaviour. Holding that off belongs to the screen you stand
+  # in front of with your hands in the food.
+  test "the week has no keep-awake switch" do
+    get kitchen_root_path
+
+    assert_select "[data-controller=wake-lock]", count: 0
+  end
 end

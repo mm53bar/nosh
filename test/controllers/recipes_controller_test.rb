@@ -92,4 +92,23 @@ class RecipesControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_match(/invalid url/i, JSON.parse(response.body)["errors"].first)
   end
+
+  # The iPad's half of the same switch. Its backend differs (a Screen Wake Lock,
+  # where the kiosk gets a lease from the host page) but the markup contract the
+  # one controller reads is identical.
+  test "the show page's method row carries the keep-awake switch" do
+    get recipe_path(recipes(:one))
+
+    assert_select "[data-controller=wake-lock]", text: /Keep awake/ do
+      assert_select "input[data-wake-lock-target=toggle][data-action=?]", "change->wake-lock#toggle"
+    end
+  end
+
+  # Revealed by the controller once a backend answers, so a bundle that never
+  # loads leaves no switch rather than one that does nothing.
+  test "the keep-awake switch is hidden until JS reveals it" do
+    get recipe_path(recipes(:one))
+
+    assert_select "[data-controller=wake-lock][hidden]"
+  end
 end
