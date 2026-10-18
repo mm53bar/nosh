@@ -1,0 +1,50 @@
+milk:
+  name: milk
+  aisle: dairy
+  position: 1
+
+butter:
+  name: butter
+  aisle: dairy
+  position: 2
+  needed: true
+
+parmesan:
+  name: parmesan
+  aisle: dairy
+  position: 3
+  group_name: cheese
+  aliases: ["parm", "parmesan style cheese"]
+
+feta:
+  name: feta
+  aisle: dairy
+  position: 4
+  group_name: cheese
+
+oat_milk:
+  name: oat milk
+  aisle: dairy
+  position: 5
+
+soy_sauce:
+  name: soy sauce
+  aisle: pantry
+  position: 1
+
+olive_oil:
+  name: olive oil
+  aisle: pantry
+  position: 2
+  group_name: oil
+
+vegetable_oil:
+  name: vegetable oil
+  aisle: pantry
+  position: 3
+  group_name: oil
+
+potatoes:
+  name: potatoes
+  aisle: pantry
+  position: 4

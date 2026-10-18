@@ -1,0 +1,13 @@
+advil_bought_once:
+  name: Advil
+  bought_at: 2026-10-01 10:00:00
+
+advil_bought_twice:
+  name: advil
+  bought_at: 2026-10-08 10:00:00
+
+advil_open:
+  name: Advil
+
+candles:
+  name: birthday candles

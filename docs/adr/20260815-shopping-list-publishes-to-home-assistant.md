@@ -2,6 +2,9 @@
 
 Date: 2026-08-15
 
+**Superseded by `20261018-shopping-list-is-a-staples-board.md`.** The push described here stays in
+place only until Home Assistant switches to nosh's board.
+
 ## Context
 
 nosh builds a shopping list by aggregating a week's meal plan, and until now that list was only

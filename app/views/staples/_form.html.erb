@@ -1,0 +1,31 @@
+<%= form_with model: staple, class: "grid gap-3 sm:grid-cols-2" do |f| %>
+  <div>
+    <%= f.label :name, class: "block text-sm font-medium" %>
+    <%= f.text_field :name, required: true, class: "w-full border rounded-md px-2 py-1" %>
+  </div>
+  <div>
+    <%= f.label :aisle_name, "Aisle", class: "block text-sm font-medium" %>
+    <%= f.text_field :aisle_name, value: staple.aisle&.name, list: "aisle-names", required: true, class: "w-full border rounded-md px-2 py-1" %>
+    <datalist id="aisle-names">
+      <% Aisle.order(:position).each do |aisle| %>
+        <option value="<%= aisle.name %>">
+      <% end %>
+    </datalist>
+  </div>
+  <div>
+    <%= f.label :aliases_text, "Also answers to", class: "block text-sm font-medium" %>
+    <%= f.text_field :aliases_text, placeholder: "mozza, shredded mozzarella", class: "w-full border rounded-md px-2 py-1" %>
+  </div>
+  <div>
+    <%= f.label :group_name, "Group", class: "block text-sm font-medium" %>
+    <%= f.text_field :group_name, placeholder: "cheese", class: "w-full border rounded-md px-2 py-1" %>
+    <p class="text-xs text-stone-500 mt-1">A group word never flips a tab — saying it asks which one.</p>
+  </div>
+  <div class="sm:col-span-2">
+    <%= f.label :note, class: "block text-sm font-medium" %>
+    <%= f.text_field :note, placeholder: "e.g. the vegetarian brand", class: "w-full border rounded-md px-2 py-1" %>
+  </div>
+  <div class="sm:col-span-2">
+    <%= f.submit class: "bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700" %>
+  </div>
+<% end %>

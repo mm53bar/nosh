@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_15_230655) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_18_215145) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -37,6 +37,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_15_230655) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "aisles", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_aisles_on_name", unique: true
   end
 
   create_table "equipment", force: :cascade do |t|
@@ -124,8 +132,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_15_230655) do
     t.datetime "created_at", null: false
     t.string "name", null: false
     t.string "source"
+    t.integer "staple_id"
     t.string "unit"
     t.datetime "updated_at", null: false
+    t.index ["staple_id"], name: "index_shopping_list_items_on_staple_id"
+  end
+
+  create_table "staples", force: :cascade do |t|
+    t.integer "aisle_id", null: false
+    t.json "aliases", default: [], null: false
+    t.datetime "created_at", null: false
+    t.string "group_name"
+    t.string "name", null: false
+    t.boolean "needed", default: false, null: false
+    t.string "note"
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["aisle_id"], name: "index_staples_on_aisle_id"
+    t.index ["name"], name: "index_staples_on_name", unique: true
   end
 
   create_table "steps", force: :cascade do |t|
@@ -163,6 +187,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_15_230655) do
     t.index ["title"], name: "index_techniques_on_title", unique: true
   end
 
+  create_table "write_ins", force: :cascade do |t|
+    t.datetime "bought_at"
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "ingredients", "recipes"
@@ -173,6 +204,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_15_230655) do
   add_foreign_key "recipe_tags", "tags"
   add_foreign_key "recipe_techniques", "recipes"
   add_foreign_key "recipe_techniques", "techniques"
+  add_foreign_key "shopping_list_items", "staples", on_delete: :nullify
+  add_foreign_key "staples", "aisles"
   add_foreign_key "steps", "recipes"
   add_foreign_key "technique_equipments", "equipment"
   add_foreign_key "technique_equipments", "techniques"

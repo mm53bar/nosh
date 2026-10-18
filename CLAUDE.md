@@ -60,15 +60,17 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   can post a raw scraped line — don't add splitting logic to callers. `bin/rails
   ingredients:lint` reports what still needs a human. See
   `docs/adr/20260815-ingredient-name-is-the-shopping-label.md`.
-- The shopping list **publishes to a Home Assistant to-do list** and is not meant to be read in
-  nosh — `POST /shopping_list/publish` ("lock it in"), one entry point for both the UI and an API
-  caller. Publishing removes **bought** items first (`todo.remove_completed_items`) then adds
-  what's missing — otherwise last week's purchase suppresses this week's genuine need for the
-  same ingredient. Outstanding items, whoever added them, are never touched and the list is never
-  bulk-replaced. Publish **once per plan**: a second run after a shop re-adds the whole trip. Categories and ordering belong to HA, which sorts by a
-  hidden due date and categorises every item whoever added it — don't send a category or compute
-  a sort key here. All config is env (`HA_*`), and nosh works normally with none of it set. See
-  `docs/adr/20260815-shopping-list-publishes-to-home-assistant.md`.
+- The shopping list is a **staples board owned by nosh**: tabs (`Staple`, grouped by `Aisle`)
+  flipped on when something runs out, write-ins (`WriteIn`) for anything else typed in, and the
+  meal plan's "this week" lines. **Voice can only flip tabs** — `POST /staples/need` / `have`
+  with a spoken `item`, answered with a `speech` string nosh writes. An unknown item is refused,
+  never written in. **The meal plan never flips a tab**: a staple ingredient becomes a marker on
+  it (`ShoppingListItem#staple`). A group word ("cheese", "oil") names several tabs and never
+  flips any of them, and can't be a tab itself. `StapleMatcher` is the one place names are
+  resolved, for voice, the typed box and the plan alike — don't match names anywhere else. The
+  board's contents are household data and stay out of `db/seeds.rb`. The Home Assistant push
+  (`ShoppingListPublisher` and friends) remains only until HA cuts over. See
+  `docs/adr/20261018-shopping-list-is-a-staples-board.md`.
 - The kitchen wall screen themes from the URL: `?theme=dark` / `?theme=light`, anything else (or
   nothing) meaning auto via `prefers-color-scheme`. `dark:` is an **opt-in** Tailwind variant keyed
   to a `theme-*` class the kitchen layout sets, so it never fires on the browse UI — every kitchen

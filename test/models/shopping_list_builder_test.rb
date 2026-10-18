@@ -15,7 +15,7 @@ class ShoppingListBuilderTest < ActiveSupport::TestCase
     ShoppingListBuilder.generate(start_date: Date.new(2026, 8, 11), end_date: Date.new(2026, 8, 11))
 
     tofu = ShoppingListItem.find_by(name: "Tofu")
-    assert_equal "400.0", tofu.amount
+    assert_equal "400", tofu.amount
     assert_equal "g", tofu.unit
   end
 
@@ -28,5 +28,24 @@ class ShoppingListBuilderTest < ActiveSupport::TestCase
     ShoppingListItem.create!(name: "Stale Leftover Item")
     ShoppingListBuilder.generate(start_date: Date.new(2026, 8, 11), end_date: Date.new(2026, 8, 12))
     assert_not ShoppingListItem.exists?(name: "Stale Leftover Item")
+  end
+
+  # A recipe using a staple marks its tab; only a person flips it.
+  test "an ingredient that is a staple is attached to its tab, which stays unflipped" do
+    ShoppingListBuilder.generate(start_date: Date.new(2026, 8, 11), end_date: Date.new(2026, 8, 11))
+
+    soy = ShoppingListItem.find_by!(name: "Soy Sauce")
+    assert_equal staples(:soy_sauce), soy.staple
+    assert_not staples(:soy_sauce).reload.needed?
+    assert_not_includes ShoppingListItem.this_week, soy
+    assert_includes ShoppingListItem.this_week, ShoppingListItem.find_by!(name: "Tofu")
+  end
+
+  test "an ingredient that names a group of tabs is left off the list" do
+    recipes(:one).ingredients.create!(name: "oil", amount: "1", unit: "tbsp", note: "")
+
+    ShoppingListBuilder.generate(start_date: Date.new(2026, 8, 11), end_date: Date.new(2026, 8, 11))
+
+    assert_not ShoppingListItem.exists?(name: "oil")
   end
 end

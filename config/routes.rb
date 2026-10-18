@@ -29,6 +29,18 @@ Rails.application.routes.draw do
     collection { patch :bulk_update }
   end
 
+  # The board. need/have take a spoken or typed name rather than an id, because
+  # that's what a voice assistant has — see ShoppingBoard.
+  resources :staples, only: [ :index, :create, :edit, :update, :destroy ] do
+    collection do
+      post :need
+      post :have
+    end
+  end
+  resources :write_ins, only: [ :create, :update, :destroy ] do
+    member { post :promote }
+  end
+
   # The kitchen wall screen (a Home Assistant dashboard framing nosh on an Echo
   # Show). Read-mostly and self-contained — deliberately not the main /recipes
   # UI, whose type scale and edit/import affordances are wrong at counter

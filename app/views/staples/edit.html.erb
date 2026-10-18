@@ -1,0 +1,9 @@
+<% content_for :title, "Edit #{@staple.name} — nosh" %>
+
+<div class="max-w-3xl mx-auto">
+  <h1 class="text-2xl font-bold mb-6">Edit <%= @staple.name %></h1>
+  <% if @staple.errors.any? %>
+    <div class="mb-4 rounded-md px-4 py-3 bg-red-100 text-red-800"><%= @staple.errors.full_messages.to_sentence %></div>
+  <% end %>
+  <%= render "form", staple: @staple %>
+</div>

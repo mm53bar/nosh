@@ -1,6 +1,8 @@
 # Aggregates ingredients across every meal-plan entry in a date range, scaling
 # amounts by servings-override/recipe-servings, then replaces the entire
-# shopping list with the result. Ported from the old app's generateShoppingList
+# shopping list with the result. An ingredient that is a staple is attached to
+# its tab as a marker and never flips it — only a person knows the cupboard is
+# empty (docs/adr/20261018-shopping-list-is-a-staples-board.md). Ported from the old app's generateShoppingList
 # (db.js) — the one piece of business logic worth carrying over deliberately
 # rather than re-deriving from scratch.
 class ShoppingListBuilder
@@ -15,15 +17,23 @@ class ShoppingListBuilder
 
   def generate
     aggregated = aggregate_ingredients
+    matcher = StapleMatcher.new
 
     ShoppingListItem.transaction do
       ShoppingListItem.delete_all
       aggregated.each_value do |item|
+        match = matcher.match(item[:name].to_s.split(",").first)
+        # A recipe that just says "oil" or "pepper" names a group of tabs, not
+        # one: it's a staple whichever it means, so it isn't a "this week" line,
+        # and there's no single tab to mark.
+        next if match.group?
+
         ShoppingListItem.create!(
           name: item[:name],
           amount: combined_amount(item[:amounts]),
           unit: item[:unit],
-          source: item[:sources].uniq.join(", ").presence
+          source: item[:sources].uniq.join(", ").presence,
+          staple: (match.staple if match.staple?)
         )
       end
     end
@@ -59,7 +69,7 @@ class ShoppingListBuilder
     return nil if amounts.empty?
 
     if amounts.all? { |amount| amount.is_a?(Numeric) }
-      amounts.sum.round(1).to_s
+      amounts.sum.round(1).to_s.delete_suffix(".0")
     else
       amounts.join(", ")
     end

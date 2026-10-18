@@ -1,0 +1,32 @@
+<% content_for :title, "Tabs — nosh" %>
+
+<div class="max-w-3xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Tabs on the board</h1>
+    <%= link_to "‹ Shopping list", shopping_list_path, class: "text-sm text-stone-500 hover:text-stone-800" %>
+  </div>
+
+  <% @aisles.each do |aisle| %>
+    <% next if aisle.staples.empty? %>
+    <h2 class="font-semibold mt-6 mb-2"><%= aisle.name %></h2>
+    <ul class="divide-y divide-stone-100">
+      <% aisle.staples.each do |staple| %>
+        <li class="flex items-baseline justify-between gap-4 py-2">
+          <span>
+            <%= staple.name %>
+            <% if staple.group_name %><span class="ml-2 text-xs rounded bg-stone-100 px-1.5 py-0.5 text-stone-600"><%= staple.group_name %></span><% end %>
+            <% if staple.aliases.any? %><span class="block text-xs text-stone-500">also: <%= staple.aliases_text %></span><% end %>
+          </span>
+          <span class="flex gap-3 text-sm">
+            <%= link_to "Edit", edit_staple_path(staple), class: "text-stone-500 hover:text-stone-800" %>
+            <%= button_to "Remove", staple_path(staple), method: :delete, class: "text-red-700 hover:underline",
+                  form: { data: { turbo_confirm: "Remove the #{staple.name} tab?" } } %>
+          </span>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <h2 class="font-semibold mt-10 mb-3">Add a tab</h2>
+  <%= render "form", staple: Staple.new %>
+</div>
