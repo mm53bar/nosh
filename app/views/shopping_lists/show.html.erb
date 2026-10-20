@@ -1,90 +1,84 @@
 <% content_for :title, "Shopping List — nosh" %>
+<% staples = @aisles.flat_map(&:staples) %>
 
-<div class="max-w-4xl mx-auto" data-controller="board">
+<div class="rails-blocks max-w-4xl mx-auto" data-controller="board">
+  <%= render "shared/components/toast/toast", position: "top-center" %>
+
   <div class="flex items-center justify-between mb-5">
     <h1 class="text-2xl font-bold">Shopping List</h1>
     <%= link_to "Edit tabs", staples_path, class: "text-sm text-stone-500 hover:text-stone-800" %>
   </div>
 
-  <form class="flex gap-2 mb-2" data-action="submit->board#add">
-    <input type="text" name="name" list="staple-names" autocomplete="off" required
-           placeholder="Add something — a tab, or a write-in"
-           data-board-target="input"
-           class="flex-1 border border-stone-300 rounded-md px-3 py-2 bg-white">
-    <button class="bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700">Add</button>
-  </form>
-  <datalist id="staple-names">
-    <% @aisles.flat_map(&:staples).each do |staple| %>
-      <option value="<%= staple.name %>">
-    <% end %>
-  </datalist>
-  <p class="min-h-6 mb-3 text-sm text-stone-600" data-board-target="message" aria-live="polite"></p>
+  <div class="mb-8" data-board-target="add" data-action="autocomplete:submit->board#add">
+    <%= render "shared/components/autocomplete/autocomplete",
+          id: "shopping-add",
+          name: "name",
+          placeholder: "Add something — a tab, or a write-in",
+          local_data: staples.map { |staple|
+            { name: staple.name, aliases: staple.aliases_text,
+              subtitle: [ staple.aisle.name, ("on the list" if staple.needed) ].compact.join(" · ") }
+          },
+          search_keys: %w[name aliases],
+          max_suggestions: 6,
+          no_results_text: "Not a tab — press Enter to write it in",
+          show_search_icon: false %>
+  </div>
 
-  <section class="rounded-xl border-2 border-stone-700/70 bg-[#f7f0dc] shadow-sm px-5 py-5 font-serif">
-    <p class="text-center text-xs tracking-[0.35em] uppercase text-stone-600 mb-4">We need</p>
+  <% if @aisles.empty? %>
+    <p class="text-stone-500 text-sm">No tabs yet. <%= link_to "Add the first one", staples_path, class: "underline" %>.</p>
+  <% end %>
 
-    <% if @aisles.empty? %>
-      <p class="text-center text-stone-500 font-sans text-sm">
-        No tabs yet. <%= link_to "Add the first one", staples_path, class: "underline" %>.
-      </p>
-    <% end %>
-
-    <% @aisles.each do |aisle| %>
-      <% next if aisle.staples.empty? %>
-      <h2 class="mt-4 first:mt-0 mb-1 text-[0.7rem] tracking-[0.25em] uppercase text-stone-500 border-b border-stone-400/50">
-        <%= aisle.name %>
-      </h2>
-      <ul class="grid grid-cols-2 sm:grid-cols-3 gap-x-6">
+  <% @aisles.each do |aisle| %>
+    <% next if aisle.staples.empty? %>
+    <section class="mb-6">
+      <h2 class="text-xs font-semibold uppercase tracking-wide text-stone-500 mb-2"><%= aisle.name %></h2>
+      <fieldset class="flex flex-wrap gap-2">
+        <legend class="sr-only"><%= aisle.name %></legend>
         <% aisle.staples.each do |staple| %>
-          <li>
-            <button type="button"
-                    class="group w-full flex items-start gap-2 py-1.5 text-left"
-                    data-on="<%= staple.needed %>"
-                    data-url="<%= staple_path(staple, format: :json) %>"
-                    data-param="staple[needed]"
-                    data-action="board#toggle"
-                    aria-pressed="<%= staple.needed %>">
-              <span class="mt-1.5 h-3 w-5 shrink-0 rounded-[2px] border border-stone-500 transition
-                           group-data-[on=true]:bg-amber-600 group-data-[on=true]:border-amber-800 group-data-[on=true]:translate-x-1"></span>
-              <span class="min-w-0">
-                <span class="text-stone-500 group-data-[on=true]:text-stone-900 group-data-[on=true]:font-semibold">
-                  <%= staple.name.upcase_first %>
-                </span>
-                <% if staple.shopping_list_items.any? %>
-                  <span class="font-sans text-xs text-amber-800 line-clamp-1">
-                    <%= staple.shopping_list_items.map { |item| [ item.quantity, item.source ].compact_blank.join(" · ") }.join("; ") %>
-                  </span>
-                <% end %>
-              </span>
-            </button>
-          </li>
+          <% markers = staple.shopping_list_items %>
+          <label for="staple-<%= staple.id %>"
+                 title="<%= markers.map { |item| [ item.quantity, item.source ].compact_blank.join(" · ") }.join("\n") %>"
+                 class="relative py-2 px-2.5 flex items-center gap-1.5 font-medium bg-white text-stone-700 rounded-xl cursor-pointer select-none ring-1 ring-stone-200
+                        has-[:checked]:ring-2 has-[:checked]:ring-amber-500 has-[:checked]:bg-amber-50 has-[:checked]:text-stone-900">
+            <input type="checkbox" id="staple-<%= staple.id %>" class="peer hidden" <%= "checked" if staple.needed %>
+                   data-url="<%= staple_path(staple, format: :json) %>"
+                   data-param="staple[needed]"
+                   data-staple="<%= staple.name %>"
+                   data-action="change->board#toggle">
+            <span class="flex size-0 shrink-0 items-center justify-center rounded-full bg-amber-600 text-transparent transition-all duration-200 -me-1.5 peer-checked:me-0 peer-checked:size-4 peer-checked:text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-2.5 shrink-0" width="12" height="12" viewBox="0 0 12 12"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" stroke="currentColor"><path d="m1.75,6c1.047,1.048,1.803,2.153,2.461,3.579,1.524-3.076,3.659-5.397,6.039-7.158"></path></g></svg>
+            </span>
+            <span><%= staple.name.upcase_first %></span>
+            <% if markers.any? %>
+              <%= render "shared/components/badge/badge",
+                    text: markers.map(&:marker_label).compact_blank.join(" + ").presence || "planned",
+                    variant: "orange", size: "sm", pill: true %>
+            <% end %>
+          </label>
         <% end %>
-      </ul>
-    <% end %>
+      </fieldset>
+    </section>
+  <% end %>
 
-    <% if @write_ins.any? %>
-      <h2 class="mt-5 mb-1 text-[0.7rem] tracking-[0.25em] uppercase text-stone-500 border-b border-stone-400/50">Written in</h2>
-      <ul>
+  <% if @write_ins.any? %>
+    <section class="mb-6">
+      <h2 class="text-xs font-semibold uppercase tracking-wide text-stone-500 mb-2">Written in</h2>
+      <ul class="space-y-2">
         <% @write_ins.each do |write_in| %>
-          <li class="flex flex-wrap items-center gap-x-4 border-b border-dashed border-stone-400/60">
-            <button type="button"
-                    class="group flex-1 flex items-center gap-2 py-1.5 text-left"
-                    data-on="false"
-                    data-url="<%= write_in_path(write_in, format: :json) %>"
-                    data-param="write_in[bought]"
-                    data-action="board#toggle">
-              <span class="h-3 w-3 shrink-0 rounded-full border border-stone-500 group-data-[on=true]:bg-stone-500"></span>
-              <span class="italic group-data-[on=true]:line-through group-data-[on=true]:text-stone-400"><%= write_in.name %></span>
-            </button>
+          <li class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+            <%= render "shared/components/checkbox/checkbox",
+                  label: write_in.name,
+                  id: "write-in-#{write_in.id}",
+                  data: { url: write_in_path(write_in, format: :json), param: "write_in[bought]", action: "change->board#toggle" } %>
             <% if write_in.promotable? %>
-              <span class="flex items-center gap-2 font-sans text-xs text-stone-600 py-1">
-                Written in <%= write_in.times_written %> times. Make it a tab in
-                <select class="border border-stone-300 rounded px-1 py-0.5 bg-white">
+              <span class="flex items-center gap-2 text-xs text-stone-600">
+                Added <%= write_in.times_written %> times — make it a tab in
+                <select class="form-control !w-auto !py-1 !text-xs" aria-label="Aisle for <%= write_in.name %>">
                   <% @aisles.each do |aisle| %>
                     <option value="<%= aisle.id %>"><%= aisle.name %></option>
                   <% end %>
                 </select>
-                <button type="button" class="underline hover:text-stone-900"
+                <button type="button" class="rounded-md bg-amber-600 px-2 py-1 font-medium text-white hover:bg-amber-700"
                         data-url="<%= promote_write_in_path(write_in, format: :json) %>"
                         data-action="board#promote">Make it a tab</button>
               </span>
@@ -92,31 +86,25 @@
           </li>
         <% end %>
       </ul>
-    <% end %>
-  </section>
+    </section>
+  <% end %>
 
-  <section class="mt-8">
+  <section class="mt-10 border-t border-stone-200 pt-6">
     <h2 class="text-lg font-semibold mb-1">This week</h2>
-    <p class="text-sm text-stone-500 mb-3">What the planned meals need that isn't a tab. Staples they use are marked on the board instead.</p>
+    <p class="text-sm text-stone-500 mb-4">What the planned meals need that isn't a tab. Staples they use are badged on their tab instead.</p>
 
     <% if @items.empty? %>
       <p class="text-stone-500 text-sm">Nothing yet — build it from the meal plan below.</p>
     <% else %>
-      <ul class="divide-y divide-stone-100">
+      <ul class="space-y-3">
         <% @items.each do |item| %>
           <li>
-            <button type="button"
-                    class="group w-full flex items-start gap-3 py-2 text-left"
-                    data-on="<%= item.checked %>"
-                    data-url="<%= shopping_list_item_path(item, format: :json) %>"
-                    data-param="shopping_list_item[checked]"
-                    data-action="board#toggle">
-              <span class="mt-1 size-4 shrink-0 rounded border border-stone-400 group-data-[on=true]:bg-stone-400"></span>
-              <span class="group-data-[on=true]:line-through group-data-[on=true]:text-stone-400">
-                <%= item.name %>
-                <span class="text-sm text-stone-500"><%= [ item.quantity, item.source ].compact_blank.join(" · ") %></span>
-              </span>
-            </button>
+            <%= render "shared/components/checkbox/checkbox",
+                  label: item.name,
+                  id: "item-#{item.id}",
+                  checked: item.checked,
+                  description: [ item.quantity, item.source ].compact_blank.join(" · ").presence,
+                  data: { url: shopping_list_item_path(item, format: :json), param: "shopping_list_item[checked]", action: "change->board#toggle" } %>
           </li>
         <% end %>
       </ul>

@@ -32,6 +32,11 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   nosh's stone/amber palette when pulling one in. Don't copy interaction JS (e.g. the navbar's
   dropdown controller) for behavior the page doesn't actually use — that's exactly the kind of
   unused scaffolding tsundoku's own history warns against.
+  Install components with the `rails-blocks` CLI (already signed in with Pro):
+  `rails-blocks install NAME --as partial --path app/views/shared/components`. Only the slice of
+  Rails Blocks' installation CSS those components need is in `application.css`, with `primary`
+  mapped to amber, and its checkbox styling is scoped to a `.rails-blocks` wrapper so the
+  kitchen screen's measured checkboxes keep their native look.
 - No manual "add a recipe" form linked from the UI (the old app didn't have one either — recipes
   arrive via migration or LLM-driven discovery adding through the JSON API). The one add path in
   the UI is pasting a source URL, which `RecipeImporter` resolves by reading the page's embedded
