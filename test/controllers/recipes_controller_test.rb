@@ -111,4 +111,36 @@ class RecipesControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "[data-controller=wake-lock][hidden]"
   end
+
+  test "show scales ingredient quantities to the servings asked for" do
+    get recipe_path(recipes(:one), servings: 8)
+
+    assert_select "turbo-frame#ingredients", text: /400 g/
+    assert_select "turbo-frame#ingredients a[href=?]", recipe_path(recipes(:one))
+  end
+
+  test "show ignores servings it can't use" do
+    get recipe_path(recipes(:one), servings: "lots")
+
+    assert_select "turbo-frame#ingredients", text: /200 g/
+    assert_select "turbo-frame#ingredients a[href=?]", recipe_path(recipes(:one), servings: 5)
+  end
+
+  test "a recipe that doesn't say how many it serves has no stepper" do
+    recipes(:one).update!(servings: nil)
+
+    get recipe_path(recipes(:one), servings: 8)
+
+    assert_select "turbo-frame#ingredients", text: /200 g/
+    assert_select "a[aria-label='More servings']", count: 0
+  end
+
+  test "show.json carries the line an ingredient was created from" do
+    recipe = recipes(:one)
+    recipe.ingredients.create!(name: "2 cups rice, rinsed")
+
+    get recipe_path(recipe, format: :json)
+
+    assert_includes response.parsed_body["ingredients"].pluck("original_text"), "2 cups rice, rinsed"
+  end
 end

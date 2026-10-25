@@ -35,7 +35,19 @@ class Recipe < ApplicationRecord
   # href, so an unrestricted scheme would be a stored-XSS vector.
   validates :source_url, format: { with: %r{\Ahttps?://\S+\z}i, message: "must be a valid http:// or https:// URL" }, allow_blank: true
 
+  MAX_SERVINGS = 48
+
   scope :planned_since, ->(date) { joins(:meal_plan_entries).where(meal_plan_entries: { date: date.. }).distinct }
+
+  # Servings asked for in a URL. A recipe that doesn't say how many it serves
+  # can't be scaled, so it stays at nil.
+  def servings_for(requested)
+    return servings if servings.nil? || requested.to_i < 1
+
+    [ requested.to_i, MAX_SERVINGS ].min
+  end
+
+  def scale_to(serving_count) = servings && serving_count ? Rational(serving_count, servings) : 1
 
   # Convenience accessor for the JSON API: accepts/returns an array of tag
   # name strings instead of Tag records, resolving or creating Tags as needed.

@@ -1,4 +1,15 @@
 module RecipesHelper
+  # A step that would leave 1..MAX_SERVINGS renders inert, so the button
+  # doesn't jump sideways when it disappears.
+  def servings_step_link(recipe, text, count, label:, kitchen: false, **options)
+    classes = "#{options[:class]} inline-flex items-center justify-center"
+    return tag.span(text, class: "#{classes} opacity-30", aria: { hidden: true }) unless count.between?(1, Recipe::MAX_SERVINGS)
+
+    servings = count unless count == recipe.servings
+    path = kitchen ? kitchen_recipe_path(recipe, servings: servings) : recipe_path(recipe, servings: servings)
+    link_to text, path, class: classes, aria: { label: label }, data: { turbo_action: "replace" }
+  end
+
   # schema.org/Recipe as a Hash, embedded as JSON-LD on the recipe page so
   # recipe-import tools (Paprika, browser clippers, etc.) and search engines
   # can read it — schema.org's Recipe type superseded the old hRecipe

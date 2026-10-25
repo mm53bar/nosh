@@ -20,6 +20,8 @@ class RecipesController < ApplicationController
   end
 
   def show
+    @servings = @recipe.servings_for(params[:servings])
+    @scale = @recipe.scale_to(@servings)
   end
 
   def new
@@ -168,7 +170,7 @@ class RecipesController < ApplicationController
       :prep_time_minutes, :total_time_minutes, :notes, :rating, :last_made_on, :image,
       :tag_names_text, :equipment_names_text,
       tag_names: [], equipment_names: [], technique_ids: [],
-      ingredients_attributes: [ :id, :amount, :amount_max, :unit, :name, :note, :position, :_destroy ],
+      ingredients_attributes: [ :id, :amount, :amount_max, :unit, :name, :note, :original_text, :position, :_destroy ],
       steps_attributes: [ :id, :instruction, :position, :_destroy ]
     )
   end

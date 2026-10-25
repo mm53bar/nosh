@@ -74,4 +74,48 @@ class IngredientTest < ActiveSupport::TestCase
     assert_equal "tahini", ingredient.name
     assert_nil ingredient.note
   end
+
+  test "keeps the line it was created from" do
+    ingredient = recipes(:one).ingredients.create!(name: "1 (14 ounce) package extra-firm tofu, drained")
+
+    assert_equal "1 (14 ounce) package extra-firm tofu, drained", ingredient.original_text
+  end
+
+  test "builds the original line from fields a caller sent already split" do
+    ingredient = recipes(:one).ingredients.create!(amount: "1 1/2", unit: "cups", name: "rice", note: "rinsed")
+
+    assert_equal "1 1/2 cups rice, rinsed", ingredient.original_text
+  end
+
+  test "never overwrites the original line on update" do
+    ingredient = recipes(:one).ingredients.create!(name: "2 cups rice", original_text: "2 cups rice (any kind)")
+    ingredient.update!(name: "jasmine rice", original_text: "something else")
+
+    assert_equal "2 cups rice (any kind)", ingredient.reload.original_text
+  end
+
+  test "applies an alias to a new ingredient, after splitting the line" do
+    IngredientAlias.create!(variant: "Scallions", canonical: "green onions")
+
+    ingredient = recipes(:one).ingredients.create!(name: "3 scallions, thinly sliced")
+
+    assert_equal "green onions", ingredient.name
+    assert_equal "thinly sliced", ingredient.note
+    assert_equal "3 scallions, thinly sliced", ingredient.original_text
+  end
+
+  test "an alias does not rename on update, which is someone deciding" do
+    ingredient = recipes(:one).ingredients.create!(name: "tofu")
+    IngredientAlias.create!(variant: "scallions", canonical: "green onions")
+    ingredient.update!(name: "scallions")
+
+    assert_equal "scallions", ingredient.name
+  end
+
+  test "scales a quantity by a servings ratio" do
+    ingredient = recipes(:one).ingredients.create!(amount: "1/3", unit: "cup", name: "rice", note: "x")
+
+    assert_equal "1 cup", ingredient.quantity(3)
+    assert_equal "½ cup", ingredient.quantity(Rational(3, 2))
+  end
 end

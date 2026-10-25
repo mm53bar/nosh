@@ -22,6 +22,7 @@ json.ingredients @recipe.ingredients do |ingredient|
   json.unit ingredient.unit
   json.name ingredient.name
   json.note ingredient.note
+  json.original_text ingredient.original_text
   json.position ingredient.position
 end
 json.steps @recipe.steps do |step|

@@ -15,6 +15,10 @@ Rails.application.routes.draw do
     end
   end
 
+  # Renames every ingredient using the variant and applies to future ones too —
+  # see IngredientAlias. The ingredient audit is the caller.
+  resources :ingredient_aliases, only: [ :index, :create, :destroy ]
+
   resources :techniques
   resources :equipment, only: [ :index, :update ]
 

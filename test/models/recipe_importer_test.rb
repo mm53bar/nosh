@@ -54,6 +54,7 @@ class RecipeImporterTest < ActiveSupport::TestCase
 
     assert_equal "extra-firm tofu", ingredient.name
     assert_equal "14 ounce; drained", ingredient.note
+    assert_equal "1 (14 ounce) package extra-firm tofu, drained", ingredient.original_text
   end
 
   test "decodes HTML entities and mixed numbers written with and" do

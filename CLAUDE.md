@@ -69,6 +69,14 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   range). Assign any written form and `HasAmount` parses it; show one with `display_amount` or
   `quantity`, never the raw column. Don't format or parse amounts anywhere else. See
   `docs/adr/20261025-amounts-are-stored-as-numbers.md`.
+- **Recipes scale with `?servings=N`** on both recipe pages, rendered on the server inside a
+  `turbo_frame_tag "ingredients"`. Pass a scale to `quantity`/`display_amount`, never multiply
+  and format yourself. See `docs/adr/20261025-servings-scale-on-the-server.md`.
+- **`IngredientAlias` renames on record and applies on create**, exact names only, never on
+  update. The ingredient audit is the one caller (`POST /ingredient_aliases.json`). See
+  `docs/adr/20261025-ingredient-aliases-apply-on-create.md`.
+- **`Ingredient#original_text` is written once**, on create, and a parser change is re-run
+  against it. See `docs/adr/20261025-ingredients-keep-their-original-line.md`.
 - The shopping list is a **staples board owned by nosh**: tabs (`Staple`, grouped by `Aisle`)
   flipped on when something runs out, write-ins (`WriteIn`) for anything else typed in, and the
   meal plan's "this week" lines. **Voice can only flip tabs** — `POST /staples/need` / `have`

@@ -144,4 +144,12 @@ class Kitchen::RecipesControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "[data-controller=wake-lock][hidden]"
   end
+
+  test "show scales to the servings asked for, and its stepper keeps the theme" do
+    get kitchen_recipe_path(@recipe, servings: 3, theme: "dark")
+
+    assert_select "aside turbo-frame#ingredients", text: /150 g/
+    assert_select "a[href=?]", kitchen_recipe_path(@recipe, theme: "dark", servings: 2)
+    assert_select "a[href=?]", kitchen_recipe_path(@recipe, theme: "dark")
+  end
 end

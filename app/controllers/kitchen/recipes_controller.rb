@@ -3,6 +3,8 @@ module Kitchen
     before_action :set_recipe
 
     def show
+      @servings = @recipe.servings_for(params[:servings])
+      @scale = @recipe.scale_to(@servings)
     end
 
     # The kitchen's own "made it", rather than a link to RecipesController#made

@@ -17,7 +17,15 @@ class Kitchen::MealsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h1", "This week"
-    assert_select "a[href=?]", kitchen_recipe_path(recipes(:one))
+    assert_select "a[href=?]", kitchen_recipe_path(recipes(:two))
+  end
+
+  test "a planned meal opens scaled to the servings it was planned for" do
+    MealPlanEntry.update_all(date: Date.current)
+
+    get kitchen_root_path
+
+    assert_select "a[href=?]", kitchen_recipe_path(recipes(:one), servings: 8), text: /8 servings/
   end
 
   test "falls back to labelled suggestions when nothing is planned" do
@@ -86,7 +94,7 @@ class Kitchen::MealsControllerTest < ActionDispatch::IntegrationTest
 
     get kitchen_root_path(theme: "dark")
 
-    assert_select "a[href=?]", kitchen_recipe_path(recipes(:one), theme: "dark")
+    assert_select "a[href=?]", kitchen_recipe_path(recipes(:two), theme: "dark")
   end
 
   # Home Assistant draws its own close button over the top-left corner when it
@@ -108,7 +116,7 @@ class Kitchen::MealsControllerTest < ActionDispatch::IntegrationTest
 
     get kitchen_root_path(embed: "1", theme: "dark")
 
-    assert_select "a[href=?]", kitchen_recipe_path(recipes(:one), theme: "dark", embed: "1")
+    assert_select "a[href=?]", kitchen_recipe_path(recipes(:two), theme: "dark", embed: "1")
   end
 
   test "suggestions exclude non-dinners" do

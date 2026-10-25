@@ -87,7 +87,7 @@ class RecipeImporter
     recipe.tag_names = extract_keywords(data["keywords"]).map { |keyword| plain_text(keyword) }.compact_blank
 
     Array(data["recipeIngredient"]).filter_map { |line| plain_text(line) }.each_with_index do |line, index|
-      recipe.ingredients.build(parse_ingredient_line(line).merge(position: index))
+      recipe.ingredients.build(parse_ingredient_line(line).merge(original_text: line, position: index))
     end
 
     extract_instructions(data["recipeInstructions"]).filter_map { |text| plain_text(text) }.each_with_index do |text, index|

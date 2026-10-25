@@ -26,9 +26,6 @@
       </span>
     <% end %>
     <%= recipe_stars(@recipe.rating) %>
-    <% if @recipe.servings %>
-      <span class="text-stone-500"><%= @recipe.servings %> servings</span>
-    <% end %>
     <% if recipe_effort(@recipe) %>
       <span class="inline-flex items-center gap-1.5 text-stone-600">
         <%= effort_dot(recipe_effort(@recipe)) %>
@@ -66,14 +63,27 @@
   <% end %>
 
   <div class="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-10 mt-8">
-    <div>
+    <%= turbo_frame_tag "ingredients", class: "block" do %>
       <p class="text-xs font-bold uppercase tracking-wide text-stone-400 mb-3">Ingredients</p>
+      <% if @servings %>
+        <div class="flex items-center gap-2 mb-4 text-sm text-stone-500">
+          <%= servings_step_link @recipe, "−", @servings - 1, label: "Fewer servings",
+                class: "w-8 h-8 rounded-full border border-stone-300 text-stone-600 hover:border-amber-600 hover:text-amber-700" %>
+          <span><strong class="text-stone-800"><%= @servings %></strong> servings</span>
+          <%= servings_step_link @recipe, "+", @servings + 1, label: "More servings",
+                class: "w-8 h-8 rounded-full border border-stone-300 text-stone-600 hover:border-amber-600 hover:text-amber-700" %>
+          <% if @servings != @recipe.servings %>
+            <%= link_to "reset to #{@recipe.servings}", recipe_path(@recipe), data: { turbo_action: "replace" },
+                  class: "text-xs text-stone-400 hover:text-amber-700" %>
+          <% end %>
+        </div>
+      <% end %>
       <% if @recipe.ingredients.any? %>
         <ul class="space-y-2.5">
           <% @recipe.ingredients.each do |ingredient| %>
             <li class="flex gap-3 text-[15px] border-b border-stone-100 pb-2 last:border-0 last:pb-0">
               <span class="font-semibold text-amber-700 whitespace-nowrap shrink-0">
-                <%= ingredient.quantity %>
+                <%= ingredient.quantity(@scale) %>
               </span>
               <span class="text-stone-800">
                 <%= ingredient.name %><% if ingredient.note.present? %><span class="text-stone-400">, <%= ingredient.note %></span><% end %>
@@ -84,7 +94,7 @@
       <% else %>
         <p class="text-stone-400 text-sm">No ingredients listed.</p>
       <% end %>
-    </div>
+    <% end %>
 
     <div>
       <div class="flex items-center justify-between flex-wrap gap-2">

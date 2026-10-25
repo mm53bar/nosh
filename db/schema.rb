@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_25_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_25_130100) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -55,12 +55,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_25_120000) do
     t.index ["name"], name: "index_equipment_on_name", unique: true
   end
 
+  create_table "ingredient_aliases", force: :cascade do |t|
+    t.string "canonical", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "variant", null: false
+    t.index ["variant"], name: "index_ingredient_aliases_on_variant", unique: true
+  end
+
   create_table "ingredients", force: :cascade do |t|
     t.decimal "amount", precision: 12, scale: 4
     t.decimal "amount_max", precision: 12, scale: 4
     t.datetime "created_at", null: false
     t.string "name", null: false
     t.string "note"
+    t.string "original_text"
     t.integer "position", default: 0, null: false
     t.integer "recipe_id", null: false
     t.string "unit"
