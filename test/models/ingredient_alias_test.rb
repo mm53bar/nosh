@@ -16,8 +16,11 @@ class IngredientAliasTest < ActiveSupport::TestCase
   test "a variant naming itself settles its casing" do
     ingredients(:one).update!(name: "TOFU")
 
-    IngredientAlias.create!(variant: "Tofu", canonical: "tofu")
+    ingredients(:three).update!(name: "tofu")
 
+    ingredient_alias = IngredientAlias.create!(variant: "Tofu", canonical: "tofu")
+
+    assert_equal 1, ingredient_alias.renamed
     assert_equal "tofu", ingredients(:one).reload.name
     assert_equal "tofu", recipes(:one).ingredients.create!(name: "Tofu", note: "x").name
   end

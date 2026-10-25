@@ -37,6 +37,6 @@ class IngredientAlias < ApplicationRecord
 
   def rename_ingredients
     self.class.where.not(id: id).where("lower(canonical) = ?", variant).update_all(canonical: canonical, updated_at: Time.current)
-    @renamed = Ingredient.where("lower(trim(name)) = ?", variant).update_all(name: canonical, updated_at: Time.current)
+    @renamed = Ingredient.where("lower(trim(name)) = ?", variant).where.not(name: canonical).update_all(name: canonical, updated_at: Time.current)
   end
 end
