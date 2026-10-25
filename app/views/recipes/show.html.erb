@@ -90,14 +90,12 @@
       <div class="flex items-center justify-between flex-wrap gap-2">
         <p class="text-xs font-bold uppercase tracking-wide text-stone-400">Method</p>
         <% if @recipe.steps.any? %>
-          <label class="inline-flex items-center gap-2 text-sm text-stone-500 cursor-pointer select-none" data-controller="wake-lock" hidden>
-            <span class="relative inline-block w-9 h-5 shrink-0">
-              <input type="checkbox" class="peer sr-only" data-wake-lock-target="toggle" data-action="change->wake-lock#toggle">
-              <span class="absolute inset-0 rounded-full bg-stone-300 peer-checked:bg-[#27ae60] transition-colors pointer-events-none"></span>
-              <span class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4 pointer-events-none"></span>
-            </span>
-            Keep awake
-          </label>
+          <div data-controller="wake-lock" data-action="change->wake-lock#change" hidden>
+            <%= render "shared/components/switch/switch",
+                  label: "Keep awake", id: "keep_awake", size: "sm",
+                  switch_classes: "peer-checked:bg-amber-600 peer-checked:group-hover:bg-amber-700",
+                  label_classes: "text-stone-500 font-normal" %>
+          </div>
         <% end %>
       </div>
 

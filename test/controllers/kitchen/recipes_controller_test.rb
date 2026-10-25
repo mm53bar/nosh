@@ -111,7 +111,7 @@ class Kitchen::RecipesControllerTest < ActionDispatch::IntegrationTest
     get kitchen_recipe_path(@recipe)
 
     assert_select "[data-controller=wake-lock]", text: /Keep awake/ do
-      assert_select "input[type=checkbox][data-wake-lock-target=toggle][data-action=?]", "change->wake-lock#toggle"
+      assert_select "input[type=checkbox][data-action=?]", "change->wake-lock#change"
     end
     assert_select "div.flex > *:last-child[data-controller=wake-lock]"
   end

@@ -16,8 +16,7 @@ import { Controller } from "@hotwired/stimulus"
 // The two are independent: on the kiosk the wake lock always fails while the
 // lease works, and on the iPad the reverse. So `checked` means "at least one
 // hold is active", and a backend failing on its own never un-checks the switch.
-// The whole control hides itself where neither backend can work, which is the
-// discipline the wake-lock-only version already had.
+// The whole control hides itself where neither backend can work.
 
 const CHANNEL = "ks-keep-awake"
 const VERSION = 1
@@ -29,52 +28,40 @@ const VERSION = 1
 const HELLO_DELAYS = [ 0, 250, 600, 1100 ]
 
 export default class extends Controller {
-  static targets = [ "toggle" ]
-
   connect() {
     this.wakeLock = null
-    this.wakeLockUsable = null // null until probed — see probeWakeLock()
+    this.wanted = false
     this.host = null // { renewMs } once the host acks
     this.leaseHeld = false
     this.renewTimer = null
     this.helloTimers = []
     this.torn = false
 
-    // Hidden until a backend proves itself, rather than shown until one fails:
-    // a switch that appears late is a smaller lie than one that does nothing.
-    // The markup ships `hidden` too, so a bundle that never loads leaves no
-    // switch rather than a dead one.
-    this.element.hidden = true
+    // Unframed, the API being present is enough to show the switch; the lock is
+    // only requested from the tap itself: a gesture-less probe at load is what
+    // kept the switch hidden on the iPad. Framed, the API is present while every request is
+    // refused by Permissions-Policy, so there only a host ack shows it.
+    this.wakeLockUsable = "wakeLock" in navigator && window.isSecureContext && window.parent === window
+
+    this.element.hidden = !this.wakeLockUsable
 
     this.handleMessage = (event) => this.receiveHostMessage(event)
     window.addEventListener("message", this.handleMessage)
 
+    // The OS drops the lock whenever the page is hidden; take it back on return.
     this.handleVisibilityChange = () => {
-      if (document.visibilityState !== "visible") return
-
-      // Re-probe if the first attempt never got to run: the spec rejects a
-      // request from a hidden document, which is indistinguishable from being
-      // blocked by policy, so a probe that ran hidden proves nothing.
-      if (this.wakeLockUsable === null) this.probeWakeLock()
-
-      // The OS drops the lock on a tab-switch; take it back if we still want it.
-      if (this.toggleTarget.checked && this.wakeLockUsable && !this.wakeLock) this.acquireWakeLock()
-
-      // Deliberately nothing here for the lease. It keeps renewing while the
-      // page is hidden, because the kiosk's return-home timer keeps counting
-      // while its app is backgrounded — releasing on hide would hand the cook
-      // back the home screen with the recipe gone, which is the bug being fixed.
-      // Frame death is what the lease's own expiry is for.
+      if (document.visibilityState === "visible" && this.wanted && this.wakeLockUsable && !this.wakeLock) {
+        this.acquireWakeLock()
+      }
     }
     document.addEventListener("visibilitychange", this.handleVisibilityChange)
 
-    this.probeWakeLock()
     this.sayHello()
   }
 
   disconnect() {
     // Requests in flight resolve after this; they check the flag rather than
-    // reaching for a target that Stimulus may no longer find.
+    // reaching for an element Stimulus may no longer find.
     this.torn = true
     window.removeEventListener("message", this.handleMessage)
     document.removeEventListener("visibilitychange", this.handleVisibilityChange)
@@ -82,8 +69,15 @@ export default class extends Controller {
     this.releaseAll()
   }
 
-  toggle() {
-    if (this.toggleTarget.checked) {
+  get toggle() {
+    return this.element.querySelector("input[type=checkbox]")
+  }
+
+  // Runs inside the tap's change event: the wake-lock request has to start here,
+  // before any await, or it may no longer count as user-initiated.
+  change() {
+    this.wanted = this.toggle.checked
+    if (this.wanted) {
       if (this.wakeLockUsable) this.acquireWakeLock()
       if (this.host) this.acquireLease()
     } else {
@@ -91,12 +85,13 @@ export default class extends Controller {
     }
   }
 
-  // A hold is a hold, whichever backend has it. Called whenever one of them
-  // changes hands, so the switch reports the union rather than the last event.
+  // Un-checks only when nothing is holding; a backend failing alone isn't "off".
   reflectHolds() {
-    if (this.torn || !this.hasToggleTarget) return
+    if (this.torn || !this.toggle) return
 
-    this.toggleTarget.checked = Boolean(this.wakeLock) || this.leaseHeld
+    const held = Boolean(this.wakeLock) || this.leaseHeld
+    if (!held) this.wanted = false
+    this.toggle.checked = held
   }
 
   reveal() {
@@ -105,49 +100,17 @@ export default class extends Controller {
 
   // -- Screen Wake Lock ------------------------------------------------------
 
-  // Whether a wake lock can be had here is not the same question as whether the
-  // API is present. Inside the host's iframe `"wakeLock" in navigator` is true
-  // while every request() rejects, because Screen Wake Lock is Permissions-
-  // Policy gated to `self` by default and the iframe carries no `allow`
-  // attribute — so a presence check would ship a dead switch on the one screen
-  // this feature is for. Ask for a real lock and hand it straight back.
-  async probeWakeLock() {
-    if (!("wakeLock" in navigator)) {
-      this.wakeLockUsable = false
-      return
-    }
-
-    // Hidden document: don't ask yet, or the rejection reads as "blocked".
-    if (document.visibilityState !== "visible") return
-
-    try {
-      const sentinel = await navigator.wakeLock.request("screen")
-      await sentinel.release()
-      if (this.torn) return
-
-      this.wakeLockUsable = true
-      this.reveal()
-
-      // This can be the re-probe on becoming visible again, in which case the
-      // switch may already be on and waiting for a backend to say yes.
-      if (this.toggleTarget.checked && !this.wakeLock) this.acquireWakeLock()
-    } catch {
-      this.wakeLockUsable = false
-    }
-  }
-
   async acquireWakeLock() {
     try {
       const sentinel = await navigator.wakeLock.request("screen")
 
-      // Un-checked — or the page left — while the request was in flight: don't
-      // start holding something nobody asked for any more.
-      if (this.torn || !this.toggleTarget.checked) return await sentinel.release()
+      if (this.torn || !this.wanted) return await sentinel.release()
 
       this.wakeLock = sentinel
+      // A release the OS made on hide keeps the switch on, so the
+      // visibilitychange handler can take the lock back.
       sentinel.addEventListener("release", () => {
         if (this.wakeLock === sentinel) this.wakeLock = null
-        this.reflectHolds()
       })
     } catch {
       this.wakeLock = null
@@ -158,10 +121,10 @@ export default class extends Controller {
   releaseWakeLock() {
     if (!this.wakeLock) return
 
-    this.wakeLock.release()
+    const sentinel = this.wakeLock
     this.wakeLock = null
+    sentinel.release()
   }
-
   // -- Host lease ------------------------------------------------------------
 
   sayHello() {
@@ -187,7 +150,7 @@ export default class extends Controller {
 
     // The ack can land after an eager tap, if the wake lock was the reason the
     // switch was already on screen.
-    if (this.toggleTarget.checked) this.acquireLease()
+    if (this.wanted) this.acquireLease()
   }
 
   // The host holds only while the newest "on" is younger than its lease, so a

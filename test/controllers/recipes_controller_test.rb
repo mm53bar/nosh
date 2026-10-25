@@ -99,8 +99,8 @@ class RecipesControllerTest < ActionDispatch::IntegrationTest
   test "the show page's method row carries the keep-awake switch" do
     get recipe_path(recipes(:one))
 
-    assert_select "[data-controller=wake-lock]", text: /Keep awake/ do
-      assert_select "input[data-wake-lock-target=toggle][data-action=?]", "change->wake-lock#toggle"
+    assert_select "[data-controller=wake-lock][data-action=?]", "change->wake-lock#change", text: /Keep awake/ do
+      assert_select "input[type=checkbox]", count: 1
     end
   end
 

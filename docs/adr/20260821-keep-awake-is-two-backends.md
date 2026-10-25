@@ -57,7 +57,7 @@ to catch doesn't exist — measured on the device, Home Assistant removes a depa
 from the DOM (deep iframe count 2 on the nosh view, 1 everywhere else), so "alive but off-screen"
 doesn't happen. Frame death is what the lease bounds; visibility is not a proxy for it.
 
-**Availability means acquirable, not present.** `"wakeLock" in navigator` is true inside the frame
+**Availability means acquirable, not present.** *(Superseded for the unframed page by `20261025-keep-awake-asks-on-the-tap.md`: the load-time probe hid the switch in Safari.)* `"wakeLock" in navigator` is true inside the frame
 while every request rejects, so a feature-detection check would show the switch and then have it
 do nothing — worse than not shipping it. The controller asks for a real lock at connect and hands
 it straight back. Because the spec also rejects for a hidden document, the probe only runs while
