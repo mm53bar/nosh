@@ -30,7 +30,8 @@ class ShoppingListBuilder
 
         ShoppingListItem.create!(
           name: item[:name],
-          amount: combined_amount(item[:amounts]),
+          amount: item[:amount],
+          amount_max: (item[:amount_max] if item[:ranged]),
           unit: item[:unit],
           source: item[:sources].uniq.join(", ").presence,
           staple: (match.staple if match.staple?)
@@ -48,30 +49,21 @@ class ShoppingListBuilder
 
     aggregated = {}
     entries.each do |entry|
-      scale = entry.servings.present? && entry.recipe.servings.present? ? entry.servings.to_f / entry.recipe.servings : 1
+      scale = entry.servings.present? && entry.recipe.servings.present? ? Rational(entry.servings, entry.recipe.servings) : 1
 
       entry.recipe.ingredients.each do |ingredient|
         key = "#{ingredient.name.downcase}|#{ingredient.unit.to_s.downcase}"
-        item = aggregated[key] ||= { name: ingredient.name, unit: ingredient.unit, amounts: [], sources: [] }
+        item = aggregated[key] ||= { name: ingredient.name, unit: ingredient.unit, amount: nil, amount_max: nil, ranged: false, sources: [] }
         # Kept so a shopping list can say *why* an item is on it — "tahini,
         # 200 g · Tofu Noodles" answers a question a bare name cannot.
         item[:sources] << entry.recipe.title
-        next if ingredient.amount.blank?
+        next if ingredient.amount.nil?
 
-        numeric = Float(ingredient.amount, exception: false)
-        item[:amounts] << (numeric ? numeric * scale : ingredient.amount)
+        item[:amount] = item[:amount].to_r + ingredient.amount * scale
+        item[:amount_max] = item[:amount_max].to_r + (ingredient.amount_max || ingredient.amount) * scale
+        item[:ranged] ||= ingredient.amount_max.present?
       end
     end
     aggregated
-  end
-
-  def combined_amount(amounts)
-    return nil if amounts.empty?
-
-    if amounts.all? { |amount| amount.is_a?(Numeric) }
-      amounts.sum.round(1).to_s.delete_suffix(".0")
-    else
-      amounts.join(", ")
-    end
   end
 end

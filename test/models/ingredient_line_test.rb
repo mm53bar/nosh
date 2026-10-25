@@ -15,6 +15,23 @@ class IngredientLineTest < ActiveSupport::TestCase
     assert_equal "1 ½", IngredientLine.parse("1 ½ cups flour").amount
   end
 
+  test "keeps a range written with to together" do
+    parsed = IngredientLine.parse("3 1/2 to 4 cups all-purpose flour")
+
+    assert_equal "3 1/2 to 4", parsed.amount
+    assert_equal "cups", parsed.unit
+    assert_equal "all-purpose flour", parsed.name
+  end
+
+  test "reads a mixed number written with and" do
+    parsed = IngredientLine.parse("1 and 1/2 cups (360ml) buttermilk, at room temperature")
+
+    assert_equal "1 1/2", parsed.amount
+    assert_equal "cups", parsed.unit
+    assert_equal "buttermilk", parsed.name
+    assert_equal "360ml; at room temperature", parsed.note
+  end
+
   test "moves a package size out of the name" do
     parsed = IngredientLine.parse("1 (14 ounce) package extra-firm tofu")
 

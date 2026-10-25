@@ -40,7 +40,7 @@ class RecipeImporterTest < ActiveSupport::TestCase
     assert_equal [ "quick", "vegetarian" ], recipe.tag_names.sort
 
     assert_equal 3, recipe.ingredients.size
-    assert_equal({ amount: "200", unit: "g", name: "tofu" }, recipe.ingredients[0].slice(:amount, :unit, :name).symbolize_keys)
+    assert_equal({ amount: 200, unit: "g", name: "tofu" }, recipe.ingredients[0].slice(:amount, :unit, :name).symbolize_keys)
     assert_equal "salt to taste", recipe.ingredients[2].name
 
     assert_equal [ "Press and cube the tofu.", "Stir-fry until golden." ], recipe.steps.map(&:instruction)
@@ -54,6 +54,26 @@ class RecipeImporterTest < ActiveSupport::TestCase
 
     assert_equal "extra-firm tofu", ingredient.name
     assert_equal "14 ounce; drained", ingredient.note
+  end
+
+  test "decodes HTML entities and mixed numbers written with and" do
+    html = json_ld_page(
+      name: "Banana Cake I&#8217;ve Made",
+      recipeIngredient: [
+        "1 and 1/2 cups (345g) mashed bananas",
+        "3 cups (375g) all-purpose flour&nbsp;(spooned &amp; leveled)",
+        "8 ounces (226g) full-fat brick&nbsp;cream cheese"
+      ],
+      recipeInstructions: [ { "@type": "HowToStep", "text": "&nbsp;Grease a 9&#215;13-inch <strong>pan</strong>." } ]
+    )
+
+    recipe = RecipeImporter.new("https://example.com/r", html: html).call.recipe
+
+    assert_equal "Banana Cake I’ve Made", recipe.title
+    assert_equal [ 1.5, "cups", "mashed bananas", "345g" ], recipe.ingredients[0].slice(:amount, :unit, :name, :note).values
+    assert_equal [ "all-purpose flour", "375g; spooned & leveled" ], recipe.ingredients[1].slice(:name, :note).values
+    assert_equal "full-fat brick cream cheese", recipe.ingredients[2].name
+    assert_equal [ "Grease a 9×13-inch pan." ], recipe.steps.map(&:instruction)
   end
 
   test "reports an error when the page has no Recipe JSON-LD" do

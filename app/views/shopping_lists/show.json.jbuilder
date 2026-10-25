@@ -17,5 +17,8 @@ json.write_ins @write_ins do |write_in|
 end
 
 json.this_week @items do |item|
-  json.extract! item, :id, :name, :amount, :unit, :source, :checked
+  json.extract! item, :id, :name, :unit, :source, :checked
+  json.amount item.amount&.to_f
+  json.amount_max item.amount_max&.to_f
+  json.quantity item.quantity.presence
 end

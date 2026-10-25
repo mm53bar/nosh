@@ -65,6 +65,10 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   can post a raw scraped line — don't add splitting logic to callers. `bin/rails
   ingredients:lint` reports what still needs a human. See
   `docs/adr/20260815-ingredient-name-is-the-shopping-label.md`.
+- Ingredient and shopping-list **amounts are numbers** (`amount`, plus `amount_max` for a
+  range). Assign any written form and `HasAmount` parses it; show one with `display_amount` or
+  `quantity`, never the raw column. Don't format or parse amounts anywhere else. See
+  `docs/adr/20261025-amounts-are-stored-as-numbers.md`.
 - The shopping list is a **staples board owned by nosh**: tabs (`Staple`, grouped by `Aisle`)
   flipped on when something runs out, write-ins (`WriteIn`) for anything else typed in, and the
   meal plan's "this week" lines. **Voice can only flip tabs** — `POST /staples/need` / `have`

@@ -16,7 +16,9 @@ json.equipment @recipe.equipment_names
 json.techniques @recipe.techniques.map { |t| { id: t.id, title: t.title } }
 json.ingredients @recipe.ingredients do |ingredient|
   json.id ingredient.id
-  json.amount ingredient.amount
+  json.amount ingredient.amount&.to_f
+  json.amount_max ingredient.amount_max&.to_f
+  json.quantity ingredient.quantity.presence
   json.unit ingredient.unit
   json.name ingredient.name
   json.note ingredient.note

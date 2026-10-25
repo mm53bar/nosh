@@ -75,22 +75,22 @@ class RecipeImporter
 
   def build_recipe(data, source_url:)
     recipe = Recipe.new(
-      title: data["name"],
-      description: data["description"],
+      title: plain_text(data["name"]),
+      description: plain_text(data["description"]),
       source_url: source_url,
       servings: extract_yield(data["recipeYield"]),
-      cuisine: Array(data["recipeCuisine"]).first,
-      meal_type: Array(data["recipeCategory"]).first,
+      cuisine: plain_text(Array(data["recipeCuisine"]).first),
+      meal_type: plain_text(Array(data["recipeCategory"]).first),
       prep_time_minutes: iso8601_minutes(data["prepTime"]),
       total_time_minutes: iso8601_minutes(data["totalTime"])
     )
-    recipe.tag_names = extract_keywords(data["keywords"])
+    recipe.tag_names = extract_keywords(data["keywords"]).map { |keyword| plain_text(keyword) }.compact_blank
 
-    Array(data["recipeIngredient"]).each_with_index do |line, index|
+    Array(data["recipeIngredient"]).filter_map { |line| plain_text(line) }.each_with_index do |line, index|
       recipe.ingredients.build(parse_ingredient_line(line).merge(position: index))
     end
 
-    extract_instructions(data["recipeInstructions"]).each_with_index do |text, index|
+    extract_instructions(data["recipeInstructions"]).filter_map { |text| plain_text(text) }.each_with_index do |text, index|
       recipe.steps.build(instruction: text, position: index)
     end
 
@@ -133,6 +133,14 @@ class RecipeImporter
   end
 
   def parse_ingredient_line(line) = IngredientLine.parse(line).to_attributes
+
+  # Sites put HTML inside JSON-LD strings: entities ("&nbsp;", "&#8217;") and
+  # sometimes tags. squish also folds the decoded non-breaking spaces.
+  def plain_text(value)
+    return nil if value.nil?
+
+    Nokogiri::HTML5.fragment(value.to_s).text.squish.presence
+  end
 
   def attach_image(recipe, image)
     url = Array(image).first

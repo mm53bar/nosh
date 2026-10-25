@@ -73,7 +73,7 @@
           <% @recipe.ingredients.each do |ingredient| %>
             <li class="flex gap-3 text-[15px] border-b border-stone-100 pb-2 last:border-0 last:pb-0">
               <span class="font-semibold text-amber-700 whitespace-nowrap shrink-0">
-                <%= [ ingredient.amount, ingredient.unit ].compact_blank.join(" ") %>
+                <%= ingredient.quantity %>
               </span>
               <span class="text-stone-800">
                 <%= ingredient.name %><% if ingredient.note.present? %><span class="text-stone-400">, <%= ingredient.note %></span><% end %>

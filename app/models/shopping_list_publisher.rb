@@ -97,7 +97,7 @@ class ShoppingListPublisher
     text.gsub(/[*_`~\[\]]/, "").sub(/\A[#>\-+\s]+/, "").strip
   end
 
-  def quantity(item) = [ item.amount, item.unit ].compact_blank.join(" ")
+  def quantity(item) = [ item.display_amount, item.unit ].compact_blank.join(" ")
 
   def unconfigured_result = Result.new(added: [], skipped: [], configured: false)
 end

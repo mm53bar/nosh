@@ -15,8 +15,19 @@ class ShoppingListBuilderTest < ActiveSupport::TestCase
     ShoppingListBuilder.generate(start_date: Date.new(2026, 8, 11), end_date: Date.new(2026, 8, 11))
 
     tofu = ShoppingListItem.find_by(name: "Tofu")
-    assert_equal "400", tofu.amount
+    assert_equal 400, tofu.amount
     assert_equal "g", tofu.unit
+  end
+
+  test "adds up fractions and ranges and shows the total with glyphs" do
+    recipes(:one).ingredients.create!(name: "flour", amount: "1/3", unit: "cup")
+    recipes(:one).ingredients.create!(name: "garlic", amount: "1-2", unit: "cloves")
+
+    # fixture :one is planned with servings: 8 against recipe servings: 4 — a 2x scale
+    ShoppingListBuilder.generate(start_date: Date.new(2026, 8, 11), end_date: Date.new(2026, 8, 11))
+
+    assert_equal "⅔ cup", ShoppingListItem.find_by!(name: "flour").quantity
+    assert_equal "2–4 cloves", ShoppingListItem.find_by!(name: "garlic").quantity
   end
 
   test "leaves amount nil when no ingredient in the range has a numeric or any amount" do

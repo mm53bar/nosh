@@ -1,4 +1,6 @@
 class Ingredient < ApplicationRecord
+  include HasAmount
+
   belongs_to :recipe
 
   validates :name, presence: true
@@ -15,6 +17,9 @@ class Ingredient < ApplicationRecord
   #
   # See docs/adr/20260815-ingredient-name-is-the-shopping-label.md.
   before_validation :split_name_into_note, on: :create
+  before_validation :keep_amount_words_in_note
+
+  def quantity = [ display_amount, unit ].compact_blank.join(" ")
 
   private
 
@@ -28,5 +33,12 @@ class Ingredient < ApplicationRecord
     self.note = parsed.note
     self.amount = parsed.amount if amount.blank?
     self.unit = parsed.unit if unit.blank?
+  end
+
+  def keep_amount_words_in_note
+    return if amount_words.blank?
+
+    self.note = [ amount_words, note ].compact_blank.join("; ")
+    @amount_words = nil
   end
 end

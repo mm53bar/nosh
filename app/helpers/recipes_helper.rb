@@ -17,7 +17,7 @@ module RecipesHelper
       "recipeCuisine" => recipe.cuisine,
       "recipeCategory" => recipe.meal_type,
       "keywords" => recipe.tag_names.presence&.join(", "),
-      "recipeIngredient" => recipe.ingredients.map { |i| [ i.amount, i.unit, i.name ].compact_blank.join(" ") },
+      "recipeIngredient" => recipe.ingredients.map { |i| [ i.quantity, i.name ].compact_blank.join(" ") },
       "recipeInstructions" => recipe.steps.map { |s| { "@type" => "HowToStep", "text" => s.instruction } }
     }.compact
   end

@@ -22,8 +22,9 @@ class IngredientLine
   QUANTITY = /[\d¼½¾⅓⅔⅛⅜⅝⅞.\/]+/
   FRACTION = /(?:\d+\/\d+|[¼½¾⅓⅔⅛⅜⅝⅞])/
   DASH = /[-–—]/
-  # "2", "1 1/2", "2–3", "1 1/2 - 2"
-  AMOUNT = /#{QUANTITY}(?:\s+#{FRACTION})?(?:\s*#{DASH}\s*#{QUANTITY}(?:\s+#{FRACTION})?)?/
+  MIXED = /#{QUANTITY}(?:\s+(?:and\s+)?#{FRACTION})?/
+  # "2", "1 1/2", "1 and 1/2", "2–3", "1 1/2 - 2", "3 1/2 to 4"
+  AMOUNT = /#{MIXED}(?:\s*#{DASH}\s*#{MIXED}|\s+to\s+#{MIXED})?/
 
   UNIT_WORDS = %w[
     cup cups tbsp tbsps tablespoon tablespoons tsp tsps teaspoon teaspoons
@@ -94,7 +95,9 @@ class IngredientLine
   # trailing lookahead would backtrack and match "2" out of "28-ounce".
   # The `%` in the lookahead keeps "100% powdered cacao" whole — a percentage
   # is part of the product name, not a quantity to pull out in front of it.
-  def take_amount(text) = slice!(text, /\A(?>(#{AMOUNT}))(?![#{DASH.source[1..-2]}%])\s*/)
+  def take_amount(text)
+    slice!(text, /\A(?>(#{AMOUNT}))(?![#{DASH.source[1..-2]}%])\s*/)&.gsub(/\s+and\s+/, " ")
+  end
 
   # "2x 400g cans cannellini beans" — the count is the amount, the size after
   # the multiplier is a note, not a second quantity to leave in the name.

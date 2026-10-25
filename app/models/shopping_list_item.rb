@@ -1,4 +1,5 @@
 class ShoppingListItem < ApplicationRecord
+  include HasAmount
   CATEGORIES = [ "Produce", "Dairy & Eggs", "Fridge", "Pantry & Dry Goods", "Frozen" ].freeze
 
   belongs_to :staple, optional: true
@@ -10,8 +11,12 @@ class ShoppingListItem < ApplicationRecord
   scope :this_week, -> { where(staple_id: nil) }
 
   # HelloFresh imports count things with the literal unit "unit" — "2 unit".
-  def quantity = [ amount, (unit unless unit == "unit") ].compact_blank.join(" ")
+  def quantity = [ display_amount, counted_unit ].compact_blank.join(" ")
 
   # A bare "2" in a badge reads as a notification count, not two of something.
-  def marker_label = quantity.match?(/\A[\d.\/¼½¾]+\z/) ? "×#{quantity}" : quantity
+  def marker_label = amount && counted_unit.blank? ? "×#{quantity}" : quantity
+
+  private
+
+  def counted_unit = (unit unless unit == "unit")
 end
