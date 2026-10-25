@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_25_130100) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_25_200000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -129,6 +129,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_25_130100) do
     t.integer "prep_time_minutes"
     t.integer "rating"
     t.integer "servings"
+    t.json "source_data"
+    t.datetime "source_fetched_at"
     t.string "source_url"
     t.string "title", null: false
     t.integer "total_time_minutes"

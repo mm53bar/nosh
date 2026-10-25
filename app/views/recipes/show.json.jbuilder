@@ -10,6 +10,7 @@ json.total_time_minutes @recipe.total_time_minutes
 json.notes @recipe.notes
 json.rating @recipe.rating
 json.last_made_on @recipe.last_made_on
+json.source_fetched_at @recipe.source_fetched_at
 json.image_url(@recipe.image.attached? ? url_for(@recipe.image) : nil)
 json.tags @recipe.tag_names
 json.equipment @recipe.equipment_names

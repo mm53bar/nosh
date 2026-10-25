@@ -29,11 +29,12 @@ class RecipeImporter
     html = @html_override || fetch(uri)
     return Result.new(nil, "Couldn't fetch that URL") unless html
 
-    data = extract_recipe_jsonld(html)
+    data = RecipeSource.extract(html)
     return Result.new(nil, "No recipe data (schema.org/Recipe JSON-LD) found on that page") unless data
 
     recipe = build_recipe(data, source_url: @url)
     if recipe.save
+      RecipeSource.new(recipe).capture!(html)
       attach_image(recipe, data["image"])
       Result.new(recipe, nil)
     else
@@ -56,23 +57,6 @@ class RecipeImporter
     nil
   end
 
-  # JSON-LD can appear as a single object, an array of objects, or an object
-  # with an "@graph" array — and "@type" can be a string or an array of
-  # strings. This walks every <script type="application/ld+json"> block
-  # looking for the first node whose type includes "Recipe".
-  def extract_recipe_jsonld(html)
-    html.scan(%r{<script[^>]+type=["']application/ld\+json["'][^>]*>(.*?)</script>}im).each do |(block)|
-      parsed = JSON.parse(block)
-      nodes = parsed.is_a?(Array) ? parsed : [ parsed ]
-      candidates = nodes.flat_map { |node| node["@graph"] || [ node ] }
-      recipe_node = candidates.find { |node| Array(node["@type"]).include?("Recipe") }
-      return recipe_node if recipe_node
-    rescue JSON::ParserError
-      next
-    end
-    nil
-  end
-
   def build_recipe(data, source_url:)
     recipe = Recipe.new(
       title: plain_text(data["name"]),
@@ -86,7 +70,7 @@ class RecipeImporter
     )
     recipe.tag_names = extract_keywords(data["keywords"]).map { |keyword| plain_text(keyword) }.compact_blank
 
-    Array(data["recipeIngredient"]).filter_map { |line| plain_text(line) }.each_with_index do |line, index|
+    RecipeSource.ingredient_lines(data).each_with_index do |line, index|
       recipe.ingredients.build(parse_ingredient_line(line).merge(original_text: line, position: index))
     end
 
@@ -134,13 +118,7 @@ class RecipeImporter
 
   def parse_ingredient_line(line) = IngredientLine.parse(line).to_attributes
 
-  # Sites put HTML inside JSON-LD strings: entities ("&nbsp;", "&#8217;") and
-  # sometimes tags. squish also folds the decoded non-breaking spaces.
-  def plain_text(value)
-    return nil if value.nil?
-
-    Nokogiri::HTML5.fragment(value.to_s).text.squish.presence
-  end
+  def plain_text(value) = RecipeSource.plain_text(value)
 
   def attach_image(recipe, image)
     url = Array(image).first

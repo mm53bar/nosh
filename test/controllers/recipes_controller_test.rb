@@ -143,4 +143,17 @@ class RecipesControllerTest < ActionDispatch::IntegrationTest
 
     assert_includes response.parsed_body["ingredients"].pluck("original_text"), "2 cups rice, rinsed"
   end
+
+  test "source takes an uploaded page and reports what it matched" do
+    html = %(<script type="application/ld+json">{"@type":"Recipe","name":"T","recipeIngredient":["200 g tofu"]}</script>)
+
+    post source_recipe_path(recipes(:one), format: :json),
+         params: { page: Rack::Test::UploadedFile.new(StringIO.new(html), "text/html", original_filename: "p.html") }
+
+    assert_response :success
+    assert_equal({ "found" => true, "matched" => 1, "ingredients" => 2 }, response.parsed_body.slice("found", "matched", "ingredients"))
+
+    get source_recipe_path(recipes(:one), format: :json)
+    assert_equal "T", response.parsed_body["source_data"]["name"]
+  end
 end

@@ -9,6 +9,8 @@ Rails.application.routes.draw do
     member do
       post :made  # mark last_made_on = today
       post :image # fetch-by-URL image attach (raw upload just posts :image to create/update)
+      get :source
+      post :source # the page the recipe came from, uploaded by whoever fetched it — see RecipeSource
     end
     collection do
       post :import # create from a source URL's schema.org/Recipe JSON-LD

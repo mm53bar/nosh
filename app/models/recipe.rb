@@ -17,6 +17,9 @@ class Recipe < ApplicationRecord
                        saver: { quality: 80 }, preprocessed: true
   end
 
+  # The page the recipe was imported from, gzipped — see RecipeSource.
+  has_one_attached :source_page
+
   has_many :ingredients, -> { order(:position) }, dependent: :destroy, inverse_of: :recipe
   has_many :steps, -> { order(:position) }, dependent: :destroy, inverse_of: :recipe
   has_many :recipe_tags, dependent: :destroy

@@ -1,7 +1,7 @@
 require "open-uri"
 
 class RecipesController < ApplicationController
-  before_action :set_recipe, only: [ :show, :edit, :update, :destroy, :made, :image ]
+  before_action :set_recipe, only: [ :show, :edit, :update, :destroy, :made, :image, :source ]
 
   def index
     @recipes = Recipe.includes(:tags, :equipment, image_attachment: :blob).order(created_at: :desc)
@@ -99,6 +99,21 @@ class RecipesController < ApplicationController
     respond_to do |format|
       format.html { redirect_to @recipe, notice: "Image updated." }
       format.json { render :show }
+    end
+  end
+
+  # JSON only. nosh never fetches here: some sources need FlareSolverr, which
+  # nosh deliberately doesn't know about, so the caller sends the page it got.
+  def source
+    if request.post?
+      page = params.require(:page)
+      html = page.respond_to?(:read) ? page.read : page.to_s
+      result = RecipeSource.new(@recipe).capture!(html.dup.force_encoding(Encoding::UTF_8).scrub, lines: Array(params[:lines]).map(&:to_s))
+      render json: { found: result.found, matched: result.matched, ingredients: result.ingredients,
+                     source_fetched_at: @recipe.source_fetched_at }
+    else
+      render json: { source_url: @recipe.source_url, source_fetched_at: @recipe.source_fetched_at,
+                     source_data: @recipe.source_data }
     end
   end
 

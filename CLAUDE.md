@@ -77,6 +77,10 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   `docs/adr/20261025-ingredient-aliases-apply-on-create.md`.
 - **`Ingredient#original_text` is written once**, on create, and a parser change is re-run
   against it. See `docs/adr/20261025-ingredients-keep-their-original-line.md`.
+- **A recipe keeps the page it came from** (`source_page`, gzipped; `source_data` for the
+  JSON-LD node). nosh never fetches it outside `RecipeImporter`; other callers upload it to
+  `POST /recipes/:id/source.json`, with `lines` when the page's JSON-LD has none. Site-specific
+  scraping stays with the caller. See `docs/adr/20261025-recipes-keep-their-source-page.md`.
 - The shopping list is a **staples board owned by nosh**: tabs (`Staple`, grouped by `Aisle`)
   flipped on when something runs out, write-ins (`WriteIn`) for anything else typed in, and the
   meal plan's "this week" lines. **Voice can only flip tabs** — `POST /staples/need` / `have`
