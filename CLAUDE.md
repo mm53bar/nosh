@@ -17,9 +17,11 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   case" — add it only if the deployment model actually changes.
 - The JSON API follows normal Rails resourceful conventions (same URLs as the HTML routes, format
   negotiated via `.json` / `Accept`) — it does **not** byte-match the old Express app's `/api/*`
-  paths. Nanoclaw's consumer scripts (recipe-discovery, the ingredient-audit skill, the meal-plan
-  slate builder) were written against the old paths and need updating to match; don't contort
-  routes/controllers to avoid that. See `docs/adr/20260809-idiomatic-api-not-byte-compatible.md`.
+  paths. Its callers are Home Assistant's voice (`staples#need`/`have`, `GET
+  /shopping_list.json`) and the ingredient-audit skill. **nanoclaw and Casey have no part in any
+  nosh workflow**: recipes, meal planning and the shopping list all happen in nosh itself, so
+  don't add endpoints or steps for them. See
+  `docs/adr/20260809-idiomatic-api-not-byte-compatible.md`.
 - Tags are a real `tags` + `recipe_tags` join, not the old app's free-text column — `Recipe#tag_names`/
   `#tag_names=` gives API/form callers an array-of-strings interface over that join without them
   needing to know it's relational underneath.

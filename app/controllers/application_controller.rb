@@ -5,8 +5,9 @@ class ApplicationController < ActionController::Base
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
 
-  # CSRF tokens are session-scoped and browsers-only; JSON API clients (nanoclaw's
-  # scripts, the ingredient-audit skill, etc.) have no session to carry one in.
+  # CSRF tokens are session-scoped and browsers-only; JSON API clients (Home
+  # Assistant's voice, the ingredient-audit skill, the kiosk's framed pages) have
+  # no session to carry one in.
   # There's no auth to protect here either way — see docs/adr/20260809-no-auth-needed.md.
   #
   # A JSON *body* counts as well as a `.json` path. Without this, a caller that
