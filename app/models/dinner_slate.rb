@@ -58,7 +58,7 @@ class DinnerSlate < ApplicationRecord
   end
 
   def self.choose(llm, candidates, wanted, kept)
-    answer = llm.complete_json(system: system_prompt, user: request(candidates, wanted, kept), timeout: 120)
+    answer = llm.complete_json(system: system_prompt, user: request(candidates, wanted, kept), timeout: 90)
     allowed = candidates.index_by(&:id)
     Array(answer.is_a?(Hash) ? answer["ideas"] : nil).filter_map do |idea|
       next unless idea.is_a?(Hash) && (recipe = allowed[idea["id"].to_s.to_i])
@@ -111,6 +111,13 @@ class DinnerSlate < ApplicationRecord
     notes.empty? ? PROMPT : "#{PROMPT}\nAbout this household:\n#{notes}\n"
   end
   private_class_method :choose, :request, :line, :system_prompt
+
+  # Keeps the ideas already showing, with the reason a new set couldn't be
+  # made; with nothing showing, the week's slate is the failure.
+  def self.record_failure(week_start, error)
+    slate = current(week_start)
+    slate&.ready? ? slate.update!(error: error) : create!(week_start: week_start, status: :failed, error: error)
+  end
 
   # The ideas with their recipes, skipping any recipe deleted since.
   def suggestions

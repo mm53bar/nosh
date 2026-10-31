@@ -49,10 +49,24 @@ class MealPlanEntriesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", meal_plan_entries_path(start: WEEK), text: "Plan the week"
   end
 
-  test "suggesting with no model configured says it couldn't" do
-    post dinner_slates_path(week_start: WEEK)
-
+  test "suggesting again happens in the background" do
+    assert_enqueued_with(job: DinnerSlateJob, args: [ { week_start: WEEK, again: true } ]) do
+      post dinner_slates_path(week_start: WEEK + 3)
+    end
     assert_redirected_to meal_plan_entries_path(start: WEEK)
-    assert_match "Couldn't suggest", flash[:alert]
+  end
+
+  test "a failed suggest-again shows beside the ideas it kept" do
+    DinnerSlate.create!(week_start: WEEK, status: :ready, ideas: [], error: "The model was unavailable")
+    get meal_plan_entries_path(start: WEEK)
+
+    assert_select "p", text: /Couldn't suggest new ideas: The model was unavailable/
+  end
+
+  test "a bad recipe id is refused, even with a name" do
+    post meal_plan_entries_path(format: :json), params: { meal_plan_entry: { date: WEEK, recipe_id: 999_999, title: "Stale" } }, as: :json
+
+    assert_response :unprocessable_entity
+    assert_includes response.parsed_body["errors"]["recipe"], "must exist"
   end
 end

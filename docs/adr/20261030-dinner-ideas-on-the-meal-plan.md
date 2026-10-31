@@ -27,8 +27,10 @@ shopping list in the same click as planning would take that away.
   "Add to…" menu of that week's nights, and each night's dropdown lists the ideas first, then
   every recipe. An idea already on the plan shows which night.
 - **"Suggest again"** makes a new slate for the same week. It keeps the ideas already on the plan
-  and never repeats the others. It waits for the model in the request. A failed retry is not
-  saved, so the last good slate stays.
+  and never repeats the others. It runs in `DinnerSlateJob`, not the request, because a model
+  call can outlast Thruster's 30-second write timeout. The page refreshes itself over Turbo
+  when the job finishes. A failed retry doesn't replace anything: the slate showing keeps its
+  ideas and gets an `error` line explaining why.
 - **Shopping stays its own step.** "Shopping list for this week" opens the Shopping page with
   that week's dates in "Build from meal plan".
 - **The banner** under the header says when a week's ideas are ready, until someone opens that

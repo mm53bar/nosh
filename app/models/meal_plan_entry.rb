@@ -5,6 +5,7 @@ class MealPlanEntry < ApplicationRecord
   belongs_to :recipe, optional: true
 
   validates :date, presence: true
+  validates :recipe, presence: { message: "must exist" }, if: :recipe_id?
   validates :title, presence: true, unless: :recipe
   normalizes :title, with: ->(title) { title.squish.presence }
 
