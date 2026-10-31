@@ -113,11 +113,11 @@
     <%= form_with url: generate_shopping_list_path, method: :post, class: "flex flex-wrap gap-3 items-end mt-6" do %>
       <div>
         <label class="block text-sm font-medium">From</label>
-        <%= date_field_tag :start_date, Date.current.beginning_of_week, class: "border rounded-md px-2 py-1" %>
+        <%= date_field_tag :start_date, params[:start].presence || Date.current.beginning_of_week, class: "border rounded-md px-2 py-1" %>
       </div>
       <div>
         <label class="block text-sm font-medium">To</label>
-        <%= date_field_tag :end_date, Date.current.end_of_week, class: "border rounded-md px-2 py-1" %>
+        <%= date_field_tag :end_date, params[:end].presence || Date.current.end_of_week, class: "border rounded-md px-2 py-1" %>
       </div>
       <%= submit_tag "Build from meal plan", class: "border border-stone-300 px-4 py-2 rounded-md hover:bg-stone-100" %>
     <% end %>

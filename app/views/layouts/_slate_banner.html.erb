@@ -1,0 +1,18 @@
+<%# Locals: slate (DinnerSlate.to_announce, or nil). Under the header until
+    someone opens that week's meal plan, or for as long as the week's ideas
+    couldn't be made. %>
+<% if slate %>
+  <div class="bg-amber-50 border-b border-amber-200">
+    <div class="container mx-auto px-4 sm:px-5 py-3 flex items-center gap-3">
+      <p class="flex-1 min-w-0 text-sm text-stone-900">
+        <% if slate.failed? %>
+          Couldn't put together dinner ideas for the week of <%= slate.week_start.strftime("%b %-d") %>.
+        <% else %>
+          Dinner ideas for the week of <%= slate.week_start.strftime("%b %-d") %> are ready.
+        <% end %>
+      </p>
+      <%= link_to (slate.failed? ? "See why" : "Plan the week"), meal_plan_entries_path(start: slate.week_start),
+            class: "shrink-0 text-xs px-2 py-1 bg-amber-600 text-white rounded hover:bg-amber-700" %>
+    </div>
+  </div>
+<% end %>

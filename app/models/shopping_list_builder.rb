@@ -45,7 +45,7 @@ class ShoppingListBuilder
   private
 
   def aggregate_ingredients
-    entries = MealPlanEntry.includes(recipe: :ingredients).where(date: @start_date..@end_date)
+    entries = MealPlanEntry.includes(recipe: :ingredients).where(date: @start_date..@end_date).where.not(recipe_id: nil)
 
     aggregated = {}
     entries.each do |entry|

@@ -17,3 +17,7 @@ production:
     class: YoutubeImportJob
     queue: default
     schedule: every day at 4:30am
+  dinner_slate:
+    class: DinnerSlateJob
+    queue: default
+    schedule: every saturday at 8am

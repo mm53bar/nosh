@@ -8,14 +8,22 @@
   </div>
 </div>
 
+<% days = (@start_date..@end_date).to_a %>
+
+<%= render "meal_plan_entries/ideas", slate: @slate, ideas: @ideas, days: days, planned_on: @planned_on if @show_ideas %>
+
 <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
-  <% (@start_date..@end_date).each do |date| %>
+  <% days.each do |date| %>
     <div class="border rounded-lg p-3">
       <h2 class="font-semibold text-sm text-stone-500"><%= date.strftime("%a %-d") %></h2>
 
       <% (@entries_by_date[date] || []).each do |entry| %>
         <div class="mt-2 flex items-start justify-between gap-1">
-          <%= link_to entry.recipe.title, entry.recipe, class: "text-sm hover:underline" %>
+          <% if entry.recipe %>
+            <%= link_to entry.recipe.title, entry.recipe, class: "text-sm hover:underline" %>
+          <% else %>
+            <span class="text-sm italic text-stone-700"><%= entry.title %></span>
+          <% end %>
           <%= button_to "✕", meal_plan_entry_path(entry), method: :delete,
                 form: { data: { turbo_confirm: "Remove from meal plan?" } }, class: "text-red-500 text-xs" %>
         </div>
@@ -25,10 +33,27 @@
         <%= hidden_field_tag "meal_plan_entry[date]", date %>
         <%= hidden_field_tag :redirect_start, @start_date %>
         <%= hidden_field_tag :redirect_end, @end_date %>
-        <%= select_tag "meal_plan_entry[recipe_id]", options_from_collection_for_select(@recipes, :id, :title),
+        <% options = options_from_collection_for_select(@recipes, :id, :title) %>
+        <% if @ideas.any? %>
+          <% options = tag.optgroup(options_for_select(@ideas.map { |idea| [ idea.recipe.title, idea.recipe.id ] }), label: "This week's ideas") +
+                       tag.optgroup(options, label: "All recipes") %>
+        <% end %>
+        <%= select_tag "meal_plan_entry[recipe_id]", options,
               include_blank: "+ Add recipe…", class: "text-sm border rounded-md px-2 py-1 w-full mt-1",
               data: { action: "change->auto-submit#submit" } %>
+      <% end %>
+
+      <%= form_with url: meal_plan_entries_path, method: :post, class: "mt-1" do %>
+        <%= hidden_field_tag "meal_plan_entry[date]", date %>
+        <%= hidden_field_tag :redirect_start, @start_date %>
+        <%= hidden_field_tag :redirect_end, @end_date %>
+        <%= text_field_tag "meal_plan_entry[title]", nil, placeholder: "or name it…", required: true,
+              aria: { label: "Name a night without a recipe" }, class: "text-sm border rounded-md px-2 py-1 w-full" %>
       <% end %>
     </div>
   <% end %>
 </div>
+
+<p class="mt-6 text-sm">
+  <%= link_to "Shopping list for this week ›", shopping_list_path(start: @start_date, end: @end_date), class: "text-amber-700 hover:underline" %>
+</p>

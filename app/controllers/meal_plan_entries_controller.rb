@@ -6,6 +6,12 @@ class MealPlanEntriesController < ApplicationController
     @entries = MealPlanEntry.includes(:recipe).where(date: @start_date..@end_date).order(:date)
     @entries_by_date = @entries.group_by(&:date)
     @recipes = Recipe.order(:title)
+
+    @slate = DinnerSlate.current(@start_date)
+    @slate&.seen! if @slate&.ready?
+    @ideas = @slate&.ready? ? @slate.suggestions : []
+    @show_ideas = @slate.present? || (@end_date >= Date.current && LlmClient.from_env.configured?)
+    @planned_on = @entries.select(&:recipe_id).to_h { |entry| [ entry.recipe_id, entry.date ] }
   end
 
   def create
@@ -41,11 +47,11 @@ class MealPlanEntriesController < ApplicationController
   end
 
   def entry_params
-    params.require(:meal_plan_entry).permit(:date, :recipe_id, :servings, :notes)
+    params.require(:meal_plan_entry).permit(:date, :recipe_id, :title, :servings, :notes)
   end
 
   def entry_json(entry)
-    { id: entry.id, date: entry.date, recipe_id: entry.recipe_id, recipe_title: entry.recipe.title,
+    { id: entry.id, date: entry.date, recipe_id: entry.recipe_id, recipe_title: entry.recipe&.title, title: entry.name,
       servings: entry.servings, notes: entry.notes }
   end
 end

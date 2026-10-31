@@ -136,4 +136,12 @@ class Kitchen::MealsControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "[data-controller=wake-lock]", count: 0
   end
+
+  test "a night without a recipe shows its name and opens nothing" do
+    MealPlanEntry.create!(date: Date.current, title: "Burrito night")
+
+    get kitchen_root_path
+
+    assert_select "h2", "Burrito night"
+  end
 end

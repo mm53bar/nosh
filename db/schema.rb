@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_30_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_30_200100) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -45,6 +45,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_30_120000) do
     t.integer "position", default: 0, null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_aisles_on_name", unique: true
+  end
+
+  create_table "dinner_slates", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "error"
+    t.json "ideas", default: [], null: false
+    t.datetime "seen_at"
+    t.string "status", null: false
+    t.datetime "updated_at", null: false
+    t.date "week_start", null: false
+    t.index ["week_start", "created_at"], name: "index_dinner_slates_on_week_start_and_created_at"
   end
 
   create_table "equipment", force: :cascade do |t|
@@ -82,8 +93,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_30_120000) do
     t.datetime "created_at", null: false
     t.date "date", null: false
     t.text "notes"
-    t.integer "recipe_id", null: false
+    t.integer "recipe_id"
     t.integer "servings"
+    t.string "title"
     t.datetime "updated_at", null: false
     t.index ["date"], name: "index_meal_plan_entries_on_date"
     t.index ["recipe_id"], name: "index_meal_plan_entries_on_recipe_id"

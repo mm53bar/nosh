@@ -49,6 +49,7 @@
       </div>
     </header>
 
+    <%= render "layouts/slate_banner", slate: DinnerSlate.to_announce unless controller_name == "meal_plan_entries" %>
     <%= render "layouts/review_banner", candidates: RecipeCandidate.awaiting_review.to_a unless controller_name == "recipe_candidates" %>
 
     <main class="container mx-auto px-5 py-8">

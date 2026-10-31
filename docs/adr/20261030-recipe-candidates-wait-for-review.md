@@ -59,7 +59,7 @@ nosh reads the transcripts itself and never adds one without a person.
 ## Alternatives considered
 
 - **Pasting a YouTube link into the import box.** It keeps a person on every add without a queue,
-  but it only works for a video someone remembers to paste. Chosen against by Mike: the playlist
+  but it only works for a video someone remembers to paste. Chosen against by the operator: the playlist
   is already the place where a video gets picked.
 - **A `needs-review` flag or tag on `Recipe`.** It needs no new model, but every query that reads
   recipes, including nanoclaw's slate builder, would have to exclude it. Missing one is how the

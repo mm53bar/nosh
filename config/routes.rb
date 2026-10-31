@@ -35,6 +35,9 @@ Rails.application.routes.draw do
   resources :equipment, only: [ :index, :update ]
 
   resources :meal_plan_entries, only: [ :index, :create, :destroy ]
+  # The week's dinner ideas — see DinnerSlate. Shown on the meal plan; this is
+  # "Suggest again".
+  resources :dinner_slates, only: [ :create ]
 
   resource :shopping_list, only: [ :show, :destroy ] do
     post :generate

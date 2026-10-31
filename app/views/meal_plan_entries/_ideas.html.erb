@@ -1,0 +1,46 @@
+<%# Locals: slate (the week's DinnerSlate, or nil), ideas (its suggestions), planned_on (recipe id → date),
+    days (the week's dates). The ideas sit above the week so each can go on a
+    night, beside anything else picked from the dropdowns below. %>
+<section class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+  <div class="flex items-center justify-between gap-4 mb-2">
+    <h2 class="font-semibold">Ideas for the week</h2>
+    <% label = if slate.nil? then "Suggest dinners" elsif slate.ready? then "Suggest again" else "Try again" end %>
+    <%= button_to label, dinner_slates_path(week_start: days.first), class: "text-sm text-amber-800 hover:underline",
+            form: { data: { turbo_submits_with: "Thinking…" } } %>
+  </div>
+
+  <% if slate.nil? %>
+    <p class="text-sm text-stone-600">No ideas for this week yet. New ones arrive on Saturday morning for the week after.</p>
+  <% elsif slate.failed? %>
+    <p class="text-sm text-red-800">Couldn't put together ideas for this week: <%= slate.error %>.</p>
+  <% else %>
+    <ul class="divide-y divide-amber-100">
+      <% ideas.each do |idea| %>
+        <li class="py-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+          <div class="flex-1 min-w-[14rem]">
+            <%= link_to idea.recipe.title, idea.recipe, class: "font-medium hover:underline" %>
+            <span class="text-xs text-stone-500">
+              <%= [ idea.recipe.cuisine.presence,
+                    (idea.recipe.total_time_minutes || idea.recipe.prep_time_minutes)&.then { "#{_1} min" },
+                    idea.complexity ].compact.join(" · ") %>
+            </span>
+            <% if idea.why %><p class="text-sm text-stone-600"><%= idea.why %></p><% end %>
+          </div>
+          <% if (date = planned_on[idea.recipe.id]) %>
+            <span class="text-sm text-emerald-700">✓ on <%= date.strftime("%a") %></span>
+          <% else %>
+            <%= form_with url: meal_plan_entries_path, method: :post, data: { controller: "auto-submit" } do %>
+              <%= hidden_field_tag "meal_plan_entry[recipe_id]", idea.recipe.id %>
+              <%= hidden_field_tag :redirect_start, days.first %>
+              <%= hidden_field_tag :redirect_end, days.last %>
+              <%= select_tag "meal_plan_entry[date]", options_for_select(days.map { |day| [ day.strftime("%a %-d"), day ] }),
+                    include_blank: "Add to…", aria: { label: "Add #{idea.recipe.title} to a night" },
+                    class: "text-sm border rounded-md px-2 py-1 bg-white",
+                    data: { action: "change->auto-submit#submit" } %>
+            <% end %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</section>

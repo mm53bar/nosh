@@ -68,3 +68,10 @@ services:
       # LLM_BASE_URL: http://192.168.1.10:11434/v1
       # LLM_MODEL: gemma4:31b-cloud
       # LLM_API_KEY: only-if-the-endpoint-needs-one
+      #
+      # Optional, with the LLM set. Every Saturday at 8am nosh suggests about
+      # eight dinners for the next week, on the Meal Plan page. Anything the
+      # suggestions should know about the household goes here, one per line.
+      # DINNER_SLATE_NOTES: |
+      #   The cook dislikes lentils.
+      #   Avoid dishes that need constant stirring at the stove, like risotto.

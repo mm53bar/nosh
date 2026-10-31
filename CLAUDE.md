@@ -54,6 +54,12 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   under the header. Identify a video by its id, never the clipping's filename. Don't let anything
   add a candidate to the collection without that review. See
   `docs/adr/20261030-recipe-candidates-wait-for-review.md`.
+- **The week's dinner ideas are a `DinnerSlate`**, made Saturday 8am by `DinnerSlateJob` and
+  shown on the Meal Plan page, where each goes on a night beside anything else. Ruby builds the
+  pool, and the model only chooses from it by id. Household specifics go in
+  `DINNER_SLATE_NOTES`, never in the prompt in the repo. Picking never publishes the shopping
+  list. A `MealPlanEntry` may be a `title` with no recipe, so read `entry.name`, not
+  `entry.recipe.title`. See `docs/adr/20261030-dinner-ideas-on-the-meal-plan.md`.
 - `Equipment` (name + owned, seeded from the household's real kitchen in `db/seeds.rb`) and
   `Technique` (title + body, freeform reference/technique content — not shaped like a Recipe) are
   real models, not tags. Equipment is create-on-the-fly by name (`HasEquipment` concern, shared by
