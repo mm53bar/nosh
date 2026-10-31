@@ -21,8 +21,9 @@ shopping list in the same click as planning would take that away.
 
   Ids the model names outside the pool are dropped. If fewer than half the ideas survive (one
   retry), the slate is kept as failed, so the banner says so rather than showing an empty week.
-- **The prompt in the repo is generic.** The household's own likes and dislikes come from
-  `DINNER_SLATE_NOTES`, because the repo is public.
+- **The prompt in the repo is generic.** The household's own likes and dislikes are
+  `Setting#dinner_slate_notes`, edited in a box under the ideas, because the repo is public. See
+  `20261031-household-settings-in-the-database.md`.
 - **Picking happens on the Meal Plan page.** The ideas sit above the week. Each idea has an
   "Add to…" menu of that week's nights, and each night's dropdown lists the ideas first, then
   every recipe. An idea already on the plan shows which night.

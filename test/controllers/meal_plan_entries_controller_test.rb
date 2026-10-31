@@ -69,4 +69,14 @@ class MealPlanEntriesControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_includes response.parsed_body["errors"]["recipe"], "must exist"
   end
+
+  test "the household's notes are edited beside the ideas" do
+    DinnerSlate.create!(week_start: WEEK, status: :ready, ideas: [])
+    patch setting_path, params: { setting: { dinner_slate_notes: "No lentils." } },
+                        headers: { "HTTP_REFERER" => meal_plan_entries_url(start: WEEK) }
+
+    assert_redirected_to meal_plan_entries_url(start: WEEK)
+    get meal_plan_entries_path(start: WEEK)
+    assert_select "textarea[name='setting[dinner_slate_notes]']", text: /No lentils\./
+  end
 end

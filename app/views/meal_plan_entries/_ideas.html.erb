@@ -46,4 +46,13 @@
       <% end %>
     </ul>
   <% end %>
+
+  <details class="mt-3 text-sm">
+    <summary class="cursor-pointer text-stone-600">What the ideas should know about us</summary>
+    <%= form_with model: Setting.current, url: setting_path, method: :patch, class: "mt-2 space-y-2" do |f| %>
+      <%= f.text_area :dinner_slate_notes, rows: 4, class: "w-full border rounded-md px-3 py-2 bg-white",
+            placeholder: "Likes, dislikes, who's cooking, busy nights. One per line." %>
+      <%= f.submit "Save", class: "bg-amber-600 text-white px-3 py-1.5 rounded-md hover:bg-amber-700" %>
+    <% end %>
+  </details>
 </section>

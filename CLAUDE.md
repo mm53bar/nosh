@@ -44,8 +44,10 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
 - The recipe list's search/sidebar filtering is entirely client-side
   (`recipe_filter_controller.js`) over the full preloaded card grid — no Turbo Frame round-trip.
   Fine at this scale (~150 recipes); revisit if the collection grows enough for that to matter.
-- No Settings model/page — don't add operator-settings infrastructure ahead of an actual need.
-  See `docs/adr/20260809-no-settings-recipe-discovery-is-nanoclaws-job.md`.
+- **`Setting` holds what the household edits in the app**, one row via `Setting.current`, named
+  columns only (today: `dinner_slate_notes`). Add a column when something real needs one, not
+  ahead of it. Household data goes there or in the DB, never in the repo. See
+  `docs/adr/20261031-household-settings-in-the-database.md`.
 - **Recipes found automatically wait for review as `RecipeCandidate`s**, never as `Recipe`s.
   `YoutubeImportJob` reads the YouTube Recipes playlist's transcripts daily from
   `YOUTUBE_CLIPPINGS_PATH` (mounted read-only) and makes one LLM call per video through
@@ -57,7 +59,7 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
 - **The week's dinner ideas are a `DinnerSlate`**, made Saturday 8am by `DinnerSlateJob` and
   shown on the Meal Plan page, where each goes on a night beside anything else. Ruby builds the
   pool, and the model only chooses from it by id. Household specifics go in
-  `DINNER_SLATE_NOTES`, never in the prompt in the repo. Picking never publishes the shopping
+  `Setting#dinner_slate_notes`, never in the prompt in the repo. Picking never publishes the shopping
   list. A `MealPlanEntry` may be a `title` with no recipe, so read `entry.name`, not
   `entry.recipe.title`. See `docs/adr/20261030-dinner-ideas-on-the-meal-plan.md`.
 - `Equipment` (name + owned, seeded from the household's real kitchen in `db/seeds.rb`) and

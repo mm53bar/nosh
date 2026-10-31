@@ -109,4 +109,16 @@ class DinnerSlateTest < ActiveSupport::TestCase
 
     assert_nil DinnerSlate.to_announce
   end
+
+  test "the household's notes go to the model" do
+    Setting.current.update!(dinner_slate_notes: "  No lentils.  ")
+    seen = nil
+    llm = FakeLlm.new("ideas" => [])
+    llm.define_singleton_method(:complete_json) { |system:, **| seen = system; { "ideas" => [] } }
+    dinner("Anything")
+
+    DinnerSlate.suggest(WEEK, llm: llm)
+
+    assert_includes seen, "About this household:\nNo lentils."
+  end
 end

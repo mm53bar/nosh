@@ -104,11 +104,11 @@ class DinnerSlate < ApplicationRecord
     {"ideas": [{"id": 12, "complexity": "quick", "why": "Shares chickpeas and cilantro with the curry."}]}
     "complexity" is one of quick, medium, involved.
   PROMPT
-  # The household's own likes and dislikes come from the environment, since
-  # the repo is public.
+  # The household's own likes and dislikes are theirs to edit, beside the
+  # ideas, and stay out of the public repo.
   def self.system_prompt
-    notes = ENV["DINNER_SLATE_NOTES"].to_s.strip
-    notes.empty? ? PROMPT : "#{PROMPT}\nAbout this household:\n#{notes}\n"
+    notes = Setting.current.dinner_slate_notes
+    notes ? "#{PROMPT}\nAbout this household:\n#{notes}\n" : PROMPT
   end
   private_class_method :choose, :request, :line, :system_prompt
 

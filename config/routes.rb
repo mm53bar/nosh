@@ -38,6 +38,7 @@ Rails.application.routes.draw do
   # The week's dinner ideas — see DinnerSlate. Shown on the meal plan; this is
   # "Suggest again".
   resources :dinner_slates, only: [ :create ]
+  resource :setting, only: [ :update ]
 
   resource :shopping_list, only: [ :show, :destroy ] do
     post :generate
