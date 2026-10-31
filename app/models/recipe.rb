@@ -54,8 +54,10 @@ class Recipe < ApplicationRecord
 
   # Convenience accessor for the JSON API: accepts/returns an array of tag
   # name strings instead of Tag records, resolving or creating Tags as needed.
+  # A new Tag is saved with the recipe, so an unsaved recipe (a review page, a
+  # failed create) leaves none behind.
   def tag_names=(names)
-    self.tags = Array(names).map { |name| Tag.find_or_create_by(name: name.to_s.strip) }
+    self.tags = Array(names).map { |name| Tag.find_or_initialize_by(name: name.to_s.strip) }
   end
 
   def tag_names

@@ -16,6 +16,9 @@ class RecipeCandidate < ApplicationRecord
   # Ingredient words that mean a dish isn't lacto-ovo vegetarian. A second
   # opinion beside the model's own answer, which is how fish got past before;
   # a false alarm here costs a glance, a miss costs a dinner.
+  # Vegetarian versions ("vegetable stock", "vegan fish sauce") are struck out
+  # first, so "chicken or vegetable stock" still flags the chicken.
+  VEGETARIAN_VERSION = /\b(?:vegetable|veggie|vegan|vegetarian|meatless|mushroom|plant[- ]based)\s+\w+/i
   NOT_VEGETARIAN = /\b(beef|pork|bacon|ham|lard|chicken|turkey|duck|lamb|veal|sausages?|chorizo|pancetta|prosciutto|salami|pepperoni|gelatine?|fish|anchov(?:y|ies)|worcestershire|salmon|tuna|cod|basa|tilapia|halibut|shrimps?|prawns?|crab|lobster|scallops?|clams?|mussels?|oyster sauce|dashi|bonito|broth|stock)\b/i
 
   belongs_to :recipe, optional: true
@@ -27,6 +30,8 @@ class RecipeCandidate < ApplicationRecord
   validates :source_url, uniqueness: true, format: { with: %r{\Ahttps?://\S+\z}i }
 
   scope :awaiting_review, -> { where(status: %w[ready failed]).order(:created_at) }
+
+  def awaiting_review? = ready? || failed?
 
   # One extraction per call, so each transcript costs one completion when it
   # works. An outage (LlmClient::Unavailable) raises without spending an
@@ -53,7 +58,7 @@ class RecipeCandidate < ApplicationRecord
     return [] unless proposal
 
     flagged = Array(proposal["not_vegetarian"]).map(&:to_s)
-    flagged += RecipeSource.ingredient_lines(proposal).grep(NOT_VEGETARIAN).reject { |line| line.match?(/\b(vegetable|veggie|mushroom|vegan|plant)\b/i) }
+    flagged += RecipeSource.ingredient_lines(proposal).select { |line| line.gsub(VEGETARIAN_VERSION, "").match?(NOT_VEGETARIAN) }
     flagged.compact_blank.uniq
   end
 
@@ -64,8 +69,11 @@ class RecipeCandidate < ApplicationRecord
   end
 
   # Saves the recipe the reviewer submitted and links it, or returns false with
-  # the recipe's errors on it.
+  # the recipe's errors on it. Only once: a resubmitted form must not add a
+  # second copy.
   def accept(recipe)
+    return false unless awaiting_review?
+
     transaction do
       raise ActiveRecord::Rollback unless recipe.save
 

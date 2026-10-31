@@ -8,6 +8,8 @@
 # LLM) → does nothing, keeping dev and CI quiet.
 class YoutubeImportJob < ApplicationJob
   queue_as :default
+  # Overlapping runs would read, and pay for, the same queued videos twice.
+  limits_concurrency key: "youtube_import", duration: 30.minutes, on_conflict: :discard
 
   PER_RUN = 5
 

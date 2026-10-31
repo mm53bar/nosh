@@ -65,4 +65,22 @@ class RecipeCandidatesControllerTest < ActionDispatch::IntegrationTest
   test "scanning queues the import job" do
     assert_enqueued_with(job: YoutubeImportJob) { post scan_recipe_candidates_path }
   end
+
+  test "a resubmitted review adds nothing" do
+    candidate = recipe_candidates(:puffs)
+    candidate.update!(status: :accepted)
+
+    assert_no_difference -> { Recipe.count } do
+      post accept_recipe_candidate_path(candidate), params: { recipe: { title: "Spinach Puffs" } }
+    end
+    assert_redirected_to recipe_candidates_path
+  end
+
+  test "discarding an accepted candidate leaves it accepted" do
+    candidate = recipe_candidates(:puffs)
+    candidate.update!(status: :accepted)
+    post discard_recipe_candidate_path(candidate)
+
+    assert candidate.reload.accepted?
+  end
 end

@@ -57,11 +57,12 @@ class RecipeCandidateTest < ActiveSupport::TestCase
 
   test "meat warnings combine the model's list with a word check" do
     c = candidate(proposal: PROPOSAL.merge(
-      "recipeIngredient" => [ "1 tbsp fish sauce", "2 cups vegetable broth", "1 cup chicken stock", "1 can beans" ],
+      "recipeIngredient" => [ "1 tbsp fish sauce", "2 cups vegetable broth", "1 cup chicken stock", "1 can beans",
+                              "4 cups chicken or vegetable stock", "1 tbsp vegan fish sauce" ],
       "not_vegetarian" => [ "1 tbsp fish sauce" ]
     ))
 
-    assert_equal [ "1 tbsp fish sauce", "1 cup chicken stock" ], c.meat_warnings
+    assert_equal [ "1 tbsp fish sauce", "1 cup chicken stock", "4 cups chicken or vegetable stock" ], c.meat_warnings
   end
 
   test "builds an unsaved recipe from the proposal" do
@@ -82,7 +83,7 @@ class RecipeCandidateTest < ActiveSupport::TestCase
   end
 
   test "accepting saves the recipe and links it" do
-    c = candidate(proposal: PROPOSAL)
+    c = candidate(proposal: PROPOSAL, status: :ready)
     recipe = c.build_recipe
 
     assert c.accept(recipe)
@@ -92,12 +93,27 @@ class RecipeCandidateTest < ActiveSupport::TestCase
   end
 
   test "an invalid recipe is not accepted" do
-    c = candidate(proposal: PROPOSAL)
+    c = candidate(proposal: PROPOSAL, status: :ready)
     recipe = c.build_recipe
     recipe.title = ""
 
     assert_not c.accept(recipe)
-    assert c.reload.queued?
+    assert c.reload.ready?
     assert recipe.new_record?
+  end
+
+  test "accepts only once" do
+    c = candidate(proposal: PROPOSAL, status: :ready)
+    assert c.accept(c.build_recipe)
+
+    assert_no_difference -> { Recipe.count } do
+      assert_not c.accept(c.build_recipe)
+    end
+  end
+
+  test "building a recipe to review creates no tags" do
+    assert_no_difference -> { Tag.count } do
+      candidate(proposal: PROPOSAL.merge("keywords" => [ "brand-new-tag" ])).build_recipe
+    end
   end
 end

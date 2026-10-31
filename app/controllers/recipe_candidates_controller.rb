@@ -12,6 +12,8 @@ class RecipeCandidatesController < ApplicationController
   end
 
   def accept
+    return redirect_to(next_review_path, alert: "\"#{@candidate.title}\" was already #{@candidate.status}.") unless @candidate.awaiting_review?
+
     @recipe = Recipe.new(recipe_params)
     if @candidate.accept(@recipe)
       redirect_to @recipe, notice: "Added \"#{@recipe.title}\"."
@@ -21,7 +23,7 @@ class RecipeCandidatesController < ApplicationController
   end
 
   def discard
-    @candidate.discarded!
+    @candidate.discarded! if @candidate.awaiting_review?
     redirect_to next_review_path, notice: "Discarded \"#{@candidate.title}\"."
   end
 
