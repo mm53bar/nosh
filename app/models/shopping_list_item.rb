@@ -1,7 +1,5 @@
 class ShoppingListItem < ApplicationRecord
   include HasAmount
-  CATEGORIES = [ "Produce", "Dairy & Eggs", "Fridge", "Pantry & Dry Goods", "Frozen" ].freeze
-
   belongs_to :staple, optional: true
 
   validates :name, presence: true

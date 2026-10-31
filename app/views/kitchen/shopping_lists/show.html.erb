@@ -2,6 +2,8 @@
 <% needed = @aisles.sum { |aisle| aisle.staples.count(&:needed) } + @write_ins.size %>
 
 <div class="h-full flex flex-col" data-controller="board">
+  <%# A tap that didn't save flips back; without this it would do so silently. %>
+  <%= render "shared/components/toast/toast", position: "top-center" %>
   <header class="shrink-0 <%= kitchen_corner_reserve("ps-6") %> pe-6 py-3 flex items-baseline gap-4">
     <h1 class="text-3xl font-bold shrink-0">Shopping</h1>
     <p class="text-lg text-stone-500 dark:text-neutral-400 truncate">

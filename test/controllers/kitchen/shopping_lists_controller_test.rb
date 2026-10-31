@@ -30,4 +30,10 @@ class Kitchen::ShoppingListsControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "input[data-url=?]", write_in_path(write_in, format: :json)
   end
+
+  test "a tap that didn't save can say so" do
+    get kitchen_shopping_list_path
+
+    assert_select "[data-controller~=toast]"
+  end
 end
