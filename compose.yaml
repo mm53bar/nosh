@@ -26,6 +26,8 @@ services:
     pull_policy: missing
     volumes:
       - /path/to/config:/rails/storage:rw   # SQLite DBs + recipe images — must persist
+      # Optional: a folder of YouTube transcripts (see YOUTUBE_CLIPPINGS_PATH below).
+      # - /path/to/Clippings/youtube:/clippings:ro
     ports:
       - "3004:8080"                  # host:container — the container port is fixed at 8080
     environment:
@@ -55,3 +57,14 @@ services:
       # HA_BASE_URL: http://192.168.1.10:8123
       # HA_TOKEN: replace-with-a-long-lived-access-token
       # HA_TODO_ENTITY: todo.shopping_list
+      #
+      # Optional. Set all three and nosh reads new videos from a YouTube
+      # "Recipes" playlist once a day and turns each into a recipe for someone
+      # to review. Nothing joins the collection until a person adds it. The
+      # folder holds one Markdown file per video with `url:` and
+      # `tags: [recipes]` frontmatter. The LLM is any OpenAI-compatible
+      # endpoint (Ollama's is <host>:11434/v1); each new video costs one call.
+      # YOUTUBE_CLIPPINGS_PATH: /clippings
+      # LLM_BASE_URL: http://192.168.1.10:11434/v1
+      # LLM_MODEL: gemma4:31b-cloud
+      # LLM_API_KEY: only-if-the-endpoint-needs-one

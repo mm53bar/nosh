@@ -37,18 +37,23 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   Rails Blocks' installation CSS those components need is in `application.css`, with `primary`
   mapped to amber, and its checkbox styling is scoped to a `.rails-blocks` wrapper so the
   kitchen screen's measured checkboxes keep their native look.
-- No manual "add a recipe" form linked from the UI (the old app didn't have one either — recipes
-  arrive via migration or LLM-driven discovery adding through the JSON API). The one add path in
-  the UI is pasting a source URL, which `RecipeImporter` resolves by reading the page's embedded
-  schema.org/Recipe JSON-LD (the same structured data nosh's own show page emits). `/recipes/new`
+- No manual "add a recipe" form linked from the UI (the old app didn't have one either). The add
+  paths in the UI are reviewing a `RecipeCandidate` (below) and pasting a source URL, which
+  `RecipeImporter` resolves by reading the page's embedded schema.org/Recipe JSON-LD (the same structured data nosh's own show page emits). `/recipes/new`
   still works as a manual fallback, just isn't linked anywhere.
 - The recipe list's search/sidebar filtering is entirely client-side
   (`recipe_filter_controller.js`) over the full preloaded card grid — no Turbo Frame round-trip.
   Fine at this scale (~150 recipes); revisit if the collection grows enough for that to matter.
-- No Settings model/page. Finding new recipes from external sites is nanoclaw's/the LLM
-  automation layer's job (`recipe-discovery.py`), not this app's — there's nothing in nosh that
-  needs FlareSolverr or similar, so don't add operator-settings infrastructure ahead of an actual
-  need. See `docs/adr/20260809-no-settings-recipe-discovery-is-nanoclaws-job.md`.
+- No Settings model/page — don't add operator-settings infrastructure ahead of an actual need.
+  See `docs/adr/20260809-no-settings-recipe-discovery-is-nanoclaws-job.md`.
+- **Recipes found automatically wait for review as `RecipeCandidate`s**, never as `Recipe`s.
+  `YoutubeImportJob` reads the YouTube Recipes playlist's transcripts daily from
+  `YOUTUBE_CLIPPINGS_PATH` (mounted read-only) and makes one LLM call per video through
+  `LlmClient` (`LLM_BASE_URL` / `LLM_MODEL`). The proposal is a schema.org/Recipe node, so
+  `RecipeImporter#build` makes it a recipe. A person adds or discards each one from the banner
+  under the header. Identify a video by its id, never the clipping's filename. Don't let anything
+  add a candidate to the collection without that review. See
+  `docs/adr/20261030-recipe-candidates-wait-for-review.md`.
 - `Equipment` (name + owned, seeded from the household's real kitchen in `db/seeds.rb`) and
   `Technique` (title + body, freeform reference/technique content — not shaped like a Recipe) are
   real models, not tags. Equipment is create-on-the-fly by name (`HasEquipment` concern, shared by

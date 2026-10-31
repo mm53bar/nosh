@@ -1,0 +1,10 @@
+<%# Locals: candidate. One short line saying what the reviewer is about to see. %>
+<% if candidate.failed? %>
+  <span class="text-xs text-red-700">Couldn't read a recipe from it</span>
+<% elsif !candidate.recipe? %>
+  <span class="text-xs text-stone-500">Probably not a recipe<%= ": #{candidate.skip_reason}" if candidate.skip_reason %></span>
+<% elsif candidate.meat_warnings.any? %>
+  <span class="text-xs text-red-700">May not be vegetarian</span>
+<% else %>
+  <span class="text-xs text-stone-500">Ready to review</span>
+<% end %>

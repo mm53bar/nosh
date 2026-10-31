@@ -1,4 +1,4 @@
-<%= form_with model: @recipe, class: "space-y-6 max-w-3xl" do |f| %>
+<%= form_with model: @recipe, url: local_assigns.fetch(:url) { polymorphic_path(@recipe) }, class: "space-y-6 max-w-3xl" do |f| %>
   <% if @recipe.errors.any? %>
     <div class="bg-red-100 text-red-800 rounded-md px-4 py-3">
       <ul class="list-disc list-inside">
@@ -88,12 +88,12 @@
     <h2 class="font-medium">Ingredients</h2>
     <div data-nested-fields-target="rows" class="space-y-2 mt-2">
       <%= f.fields_for :ingredients do |ingredient_form| %>
-        <%= render "ingredient_fields", form: ingredient_form %>
+        <%= render "recipes/ingredient_fields", form: ingredient_form %>
       <% end %>
     </div>
     <template data-nested-fields-target="template">
       <%= f.fields_for :ingredients, Ingredient.new, child_index: "NEW_RECORD" do |ingredient_form| %>
-        <%= render "ingredient_fields", form: ingredient_form %>
+        <%= render "recipes/ingredient_fields", form: ingredient_form %>
       <% end %>
     </template>
     <button type="button" data-action="nested-fields#add" class="text-amber-700 text-sm mt-2">+ Add ingredient</button>
@@ -103,16 +103,16 @@
     <h2 class="font-medium">Steps</h2>
     <div data-nested-fields-target="rows" class="space-y-2 mt-2">
       <%= f.fields_for :steps do |step_form| %>
-        <%= render "step_fields", form: step_form %>
+        <%= render "recipes/step_fields", form: step_form %>
       <% end %>
     </div>
     <template data-nested-fields-target="template">
       <%= f.fields_for :steps, Step.new, child_index: "NEW_RECORD" do |step_form| %>
-        <%= render "step_fields", form: step_form %>
+        <%= render "recipes/step_fields", form: step_form %>
       <% end %>
     </template>
     <button type="button" data-action="nested-fields#add" class="text-amber-700 text-sm mt-2">+ Add step</button>
   </div>
 
-  <%= f.submit(@recipe.persisted? ? "Save Recipe" : "Add Recipe", class: "bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700") %>
+  <%= f.submit(local_assigns.fetch(:submit) { @recipe.persisted? ? "Save Recipe" : "Add Recipe" }, class: "bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700") %>
 <% end %>

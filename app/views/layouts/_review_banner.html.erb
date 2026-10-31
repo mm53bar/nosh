@@ -1,0 +1,23 @@
+<%# Locals: candidates (RecipeCandidate.awaiting_review). Under the header on
+    every page while anything is waiting, the way tsundoku shows enrichments
+    to review; it goes away once each one is accepted or discarded. %>
+<% if candidates.any? %>
+  <div class="bg-amber-50 border-b border-amber-200">
+    <div class="container mx-auto px-4 sm:px-5 py-3 space-y-2">
+      <% candidates.first(3).each do |candidate| %>
+        <div class="flex items-center gap-3">
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-stone-900 truncate"><%= candidate.title %></p>
+            <%= render "recipe_candidates/status", candidate: candidate %>
+          </div>
+          <%= link_to "Review", recipe_candidate_path(candidate),
+                class: "shrink-0 text-xs px-2 py-1 bg-amber-600 text-white rounded hover:bg-amber-700" %>
+        </div>
+      <% end %>
+      <% if candidates.size > 3 %>
+        <%= link_to "#{candidates.size - 3} more waiting for review ›", recipe_candidates_path,
+              class: "block text-xs text-amber-800 hover:underline" %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

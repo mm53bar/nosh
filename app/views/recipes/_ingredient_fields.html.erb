@@ -1,5 +1,6 @@
 <div class="flex gap-2 items-start" data-nested-fields-target="row">
   <%= form.hidden_field :id %>
+  <%= form.hidden_field :original_text %>
   <%= form.text_field :amount, value: form.object.display_amount, placeholder: "Amount", class: "border rounded-md px-2 py-1 w-20" %>
   <%= form.text_field :unit, placeholder: "Unit", class: "border rounded-md px-2 py-1 w-24" %>
   <%= form.text_field :name, placeholder: "Ingredient", class: "border rounded-md px-2 py-1 flex-1" %>

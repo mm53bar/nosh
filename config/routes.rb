@@ -17,6 +17,16 @@ Rails.application.routes.draw do
     end
   end
 
+  # Recipes found automatically (YouTube transcripts) wait here until a person
+  # accepts or discards them — see RecipeCandidate.
+  resources :recipe_candidates, only: [ :index, :show ] do
+    member do
+      post :accept
+      post :discard
+    end
+    collection { post :scan }
+  end
+
   # Renames every ingredient using the variant and applies to future ones too —
   # see IngredientAlias. The ingredient audit is the caller.
   resources :ingredient_aliases, only: [ :index, :create, :destroy ]

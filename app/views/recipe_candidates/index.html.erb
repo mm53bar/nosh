@@ -1,0 +1,32 @@
+<% content_for :title, "To review — nosh" %>
+
+<div class="max-w-3xl mx-auto">
+  <div class="flex items-center justify-between mb-2">
+    <h1 class="text-2xl font-bold">To review</h1>
+    <%= button_to "Check for new videos", scan_recipe_candidates_path,
+          class: "text-sm text-amber-700 hover:underline" %>
+  </div>
+  <p class="text-sm text-stone-500 mb-6">
+    Recipes read from videos in the YouTube Recipes playlist. Nothing here is in the collection until it's added.
+    <% if @queued_count.positive? %>
+      <%= pluralize(@queued_count, "more video") %> still to be read.
+    <% end %>
+  </p>
+
+  <% if @candidates.any? %>
+    <ul class="divide-y divide-stone-100">
+      <% @candidates.each do |candidate| %>
+        <li class="flex items-center gap-4 py-3">
+          <div class="flex-1 min-w-0">
+            <p class="font-medium truncate"><%= candidate.title %></p>
+            <%= render "recipe_candidates/status", candidate: candidate %>
+          </div>
+          <%= link_to "Review", recipe_candidate_path(candidate),
+                class: "shrink-0 text-sm px-3 py-1.5 bg-amber-600 text-white rounded-md hover:bg-amber-700" %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="text-stone-500">Nothing waiting.</p>
+  <% end %>
+</div>

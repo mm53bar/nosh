@@ -49,6 +49,8 @@
       </div>
     </header>
 
+    <%= render "layouts/review_banner", candidates: RecipeCandidate.awaiting_review.to_a unless controller_name == "recipe_candidates" %>
+
     <main class="container mx-auto px-5 py-8">
       <% flash.each do |type, message| %>
         <div class="mb-4 rounded-md px-4 py-3 <%= type == "alert" ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800" %>">

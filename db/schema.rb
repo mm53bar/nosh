@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_25_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_30_120000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -87,6 +87,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_25_200000) do
     t.datetime "updated_at", null: false
     t.index ["date"], name: "index_meal_plan_entries_on_date"
     t.index ["recipe_id"], name: "index_meal_plan_entries_on_recipe_id"
+  end
+
+  create_table "recipe_candidates", force: :cascade do |t|
+    t.integer "attempts", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.string "error"
+    t.string "image_url"
+    t.string "origin", null: false
+    t.json "proposal"
+    t.integer "recipe_id"
+    t.text "source_text"
+    t.string "source_url", null: false
+    t.string "status", default: "queued", null: false
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.index ["recipe_id"], name: "index_recipe_candidates_on_recipe_id"
+    t.index ["source_url"], name: "index_recipe_candidates_on_source_url", unique: true
+    t.index ["status"], name: "index_recipe_candidates_on_status"
   end
 
   create_table "recipe_equipments", force: :cascade do |t|
@@ -211,6 +229,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_25_200000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "ingredients", "recipes"
   add_foreign_key "meal_plan_entries", "recipes"
+  add_foreign_key "recipe_candidates", "recipes", on_delete: :nullify
   add_foreign_key "recipe_equipments", "equipment"
   add_foreign_key "recipe_equipments", "recipes"
   add_foreign_key "recipe_tags", "recipes"

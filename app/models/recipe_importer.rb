@@ -32,7 +32,7 @@ class RecipeImporter
     data = RecipeSource.extract(html)
     return Result.new(nil, "No recipe data (schema.org/Recipe JSON-LD) found on that page") unless data
 
-    recipe = build_recipe(data, source_url: @url)
+    recipe = build(data)
     if recipe.save
       RecipeSource.new(recipe).capture!(html)
       attach_image(recipe, data["image"])
@@ -42,26 +42,13 @@ class RecipeImporter
     end
   end
 
-  private
-
-  def parse_uri(url)
-    uri = URI.parse(url.to_s)
-    uri if %w[http https].include?(uri.scheme)
-  rescue URI::InvalidURIError
-    nil
-  end
-
-  def fetch(uri)
-    URI.open(uri, "User-Agent" => "Mozilla/5.0 (compatible; nosh-importer)", redirect: true, read_timeout: 15).read
-  rescue StandardError
-    nil
-  end
-
-  def build_recipe(data, source_url:)
+  # An unsaved recipe from a schema.org/Recipe node. Also how a RecipeCandidate's
+  # proposal, which is shaped like one, becomes a recipe to review.
+  def build(data)
     recipe = Recipe.new(
       title: plain_text(data["name"]),
       description: plain_text(data["description"]),
-      source_url: source_url,
+      source_url: @url,
       servings: extract_yield(data["recipeYield"]),
       cuisine: plain_text(Array(data["recipeCuisine"]).first),
       meal_type: plain_text(Array(data["recipeCategory"]).first),
@@ -79,6 +66,21 @@ class RecipeImporter
     end
 
     recipe
+  end
+
+  private
+
+  def parse_uri(url)
+    uri = URI.parse(url.to_s)
+    uri if %w[http https].include?(uri.scheme)
+  rescue URI::InvalidURIError
+    nil
+  end
+
+  def fetch(uri)
+    URI.open(uri, "User-Agent" => "Mozilla/5.0 (compatible; nosh-importer)", redirect: true, read_timeout: 15).read
+  rescue StandardError
+    nil
   end
 
   def extract_yield(recipe_yield)

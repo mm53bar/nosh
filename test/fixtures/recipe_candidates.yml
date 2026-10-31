@@ -1,0 +1,17 @@
+puffs:
+  origin: youtube
+  source_url: https://www.youtube.com/watch?v=x5-QoCicNfI
+  title: "Binging with Babish: Spinach Puffs"
+  source_text: "Two cups of spinach, one sheet of puff pastry."
+  status: ready
+  attempts: 1
+  proposal:
+    is_recipe: true
+    name: Spinach Puffs
+    recipeYield: "12"
+    recipeCategory: Snack
+    keywords: [appetizer, spinach]
+    recipeIngredient: ["2 cups spinach, chopped", "1 sheet puff pastry"]
+    recipeInstructions: ["Cook the spinach.", "Fill the pastry and bake."]
+    vegetarian: true
+    not_vegetarian: []

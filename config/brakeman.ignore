@@ -7,6 +7,11 @@
       "file": "app/views/recipes/show.html.erb",
       "line": 64,
       "note": "Recipe#source_url has a model validation (format: %r{\\Ahttps?://\\S+\\z}i) rejecting any non-http(s) scheme, so javascript:/data: URLs can never be saved. Belt-and-suspenders would be a render-time re-check, but the validation alone already closes the vector Brakeman is flagging."
+    },
+    {
+      "fingerprint": "3273b743a5e4f4f1d885af5a1e14504aa87c0853a4ba5763eda43ac5e178ce75",
+      "file": "app/views/recipe_candidates/show.html.erb",
+      "note": "RecipeCandidate#source_url has the same model validation as Recipe#source_url (format: %r{\\Ahttps?://\\S+\\z}i), so a javascript:/data: URL can never be saved."
     }
   ],
   "updated": "2026-08-09T00:00:00Z",
