@@ -1,0 +1,53 @@
+<% content_for :title, "Shopping — nosh" %>
+<% needed = @aisles.sum { |aisle| aisle.staples.count(&:needed) } + @write_ins.size %>
+
+<div class="h-full flex flex-col" data-controller="board">
+  <header class="shrink-0 <%= kitchen_corner_reserve("ps-6") %> pe-6 py-3 flex items-baseline gap-4">
+    <h1 class="text-3xl font-bold shrink-0">Shopping</h1>
+    <p class="text-lg text-stone-500 dark:text-neutral-400 truncate">
+      <%= needed.zero? ? "Nothing on the list" : "#{needed} on the list" %> · tap what's run out
+    </p>
+  </header>
+
+  <%# One row per aisle, its tabs wrapping across the full width, so the whole
+      board is on the 853×533 frame at once — measured, see the ADR. %>
+  <div class="flex-1 overflow-y-auto px-4 pb-3 space-y-1.5">
+    <% @aisles.each do |aisle| %>
+      <section class="flex items-start gap-2">
+        <h2 class="w-[4.5rem] shrink-0 pt-1.5 text-xs leading-[1.1] font-bold uppercase tracking-wide text-stone-500 dark:text-neutral-400"><%= aisle.name %></h2>
+        <div class="flex flex-1 flex-wrap gap-1.5">
+          <% aisle.staples.each do |staple| %>
+            <label class="flex items-center gap-1 rounded-lg px-[7px] py-[5px] text-base leading-tight select-none cursor-pointer
+                          bg-white text-stone-700 ring-1 ring-stone-200 dark:bg-neutral-900 dark:text-neutral-200 dark:ring-neutral-800
+                          has-[:checked]:bg-amber-500 has-[:checked]:text-white has-[:checked]:ring-amber-500
+                          dark:has-[:checked]:bg-amber-500 dark:has-[:checked]:text-neutral-950 dark:has-[:checked]:ring-amber-500">
+              <input type="checkbox" class="hidden" <%= "checked" if staple.needed %>
+                     data-url="<%= staple_path(staple, format: :json) %>" data-param="staple[needed]"
+                     data-staple="<%= staple.name %>" data-action="change->board#toggle">
+              <%= staple.name.upcase_first %>
+              <% if staple.shopping_list_items.any? %>
+                <span class="size-1.5 rounded-full bg-amber-600 dark:bg-amber-400" title="This week's meals use it"></span>
+              <% end %>
+            </label>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+
+    <% if @write_ins.any? %>
+      <section class="flex items-start gap-2">
+        <h2 class="w-[4.5rem] shrink-0 pt-1.5 text-xs leading-[1.1] font-bold uppercase tracking-wide text-stone-500 dark:text-neutral-400">Written in</h2>
+        <div class="flex flex-1 flex-wrap gap-1.5">
+          <% @write_ins.each do |write_in| %>
+            <label class="flex items-center gap-1.5 rounded-lg px-[7px] py-[5px] text-base leading-tight select-none cursor-pointer bg-white ring-1 ring-stone-200 dark:bg-neutral-900 dark:ring-neutral-800 has-[:checked]:line-through has-[:checked]:opacity-50">
+              <input type="checkbox" class="size-4 accent-amber-600"
+                     data-url="<%= write_in_path(write_in, format: :json) %>" data-param="write_in[bought]"
+                     data-action="change->board#toggle">
+              <%= write_in.name %>
+            </label>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+  </div>
+</div>

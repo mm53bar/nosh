@@ -66,6 +66,7 @@ Rails.application.routes.draw do
     resources :recipes, only: [ :show ] do
       member { post :made }
     end
+    resource :shopping_list, only: [ :show ]
   end
 
   get "/stats", to: "stats#show"

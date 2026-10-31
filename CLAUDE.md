@@ -122,6 +122,10 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   is **853×533 CSS px**, not 1280×800: both kitchen headers are one row, and the week's grid is
   tuned so all seven days clear the fold with 5.5px to spare — re-measure before growing a card or
   a header. See `docs/adr/20260817-kitchen-embed-reserves-the-corner.md`.
+- The kiosk's shopping view is **`/kitchen/shopping_list`**: every tab on one 853×533 screen,
+  one row per aisle, tapped to flip, with write-ins, no typing and no "this week" lines. It
+  clears the fold by 30.6px with three write-ins. Re-measure before growing it. See
+  `docs/adr/20261031-kitchen-shopping-board.md`.
 - **"Keep awake" is one switch over two backends**, and `checked` means "at least one hold is
   active" — a Screen Wake Lock for an iPad, and a lease relayed by the host page for the kiosk,
   whose app-level return-home timer no web API can reach. Inside the frame the wake lock always

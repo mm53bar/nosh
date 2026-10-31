@@ -12,7 +12,7 @@ export default class extends Controller {
     // The vendored autocomplete ends every pick or Enter with form.submit(), a
     // full navigation that skips submit handlers. Its `autocomplete:submit`
     // event, dispatched just before, is the hook; the navigation must not run.
-    const form = this.addTarget.querySelector("form")
+    const form = this.hasAddTarget && this.addTarget.querySelector("form")
     if (form) form.submit = () => {}
 
     this.#showPendingToast()
