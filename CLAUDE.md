@@ -102,8 +102,9 @@ rules, not a spec — read the code and `docs/adr/` for the actual design.
   it (`ShoppingListItem#staple`). A group word ("cheese", "oil") names several tabs and never
   flips any of them, and can't be a tab itself. `StapleMatcher` is the one place names are
   resolved, for voice, the typed box and the plan alike — don't match names anywhere else. The
-  board's contents are household data and stay out of `db/seeds.rb`. The Home Assistant push
-  (`ShoppingListPublisher` and friends) remains only until HA cuts over. See
+  board's contents are household data and stay out of `db/seeds.rb`. **nosh never writes to Home
+  Assistant**: the board is the only list, and HA only calls `need`/`have`/`GET
+  /shopping_list.json`. See `docs/adr/20261031-home-assistant-push-removed.md` and
   `docs/adr/20261018-shopping-list-is-a-staples-board.md`.
 - The kitchen wall screen themes from the URL: `?theme=dark` / `?theme=light`, anything else (or
   nothing) meaning auto via `prefers-color-scheme`. `dark:` is an **opt-in** Tailwind variant keyed

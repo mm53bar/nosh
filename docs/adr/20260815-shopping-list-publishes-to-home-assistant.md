@@ -2,8 +2,9 @@
 
 Date: 2026-08-15
 
-**Superseded by `20261018-shopping-list-is-a-staples-board.md`.** The push described here stays in
-place only until Home Assistant switches to nosh's board.
+**Superseded by `20261018-shopping-list-is-a-staples-board.md`.** Home Assistant switched to
+nosh's board on 2026-10-30, and the push described here was removed on 2026-10-31
+(`20261031-home-assistant-push-removed.md`).
 
 ## Context
 

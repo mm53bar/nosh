@@ -9,10 +9,10 @@ that falls out of it.
 
 Rebuilt from an earlier Node/Express app, and in daily use since August 2026. Recipe CRUD
 (ingredients, steps, tags, ratings, cuisine/meal-type, photos via Active Storage), a weekly
-meal-plan grid, a wall-screen mode for cooking from (see below), and a shopping list that scales
-ingredient quantities to planned servings and publishes into a Home Assistant to-do list rather
-than being read here — see
-[`docs/adr/20260815-shopping-list-publishes-to-home-assistant.md`](docs/adr/20260815-shopping-list-publishes-to-home-assistant.md).
+meal-plan grid, a wall-screen mode for cooking from (see below), and a shopping list that is a
+board of staples flipped on when they run out, plus what the week's meals need — see
+[`docs/adr/20261018-shopping-list-is-a-staples-board.md`](docs/adr/20261018-shopping-list-is-a-staples-board.md).
+A voice assistant can flip the board's tabs over a small JSON API.
 No login system — see
 [`docs/adr/20260809-no-auth-needed.md`](docs/adr/20260809-no-auth-needed.md). See
 [plan.md](plan.md) for the build plan and [docs/adr/](docs/adr/) for design records.

@@ -42,12 +42,8 @@ Rails.application.routes.draw do
 
   resource :shopping_list, only: [ :show, :destroy ] do
     post :generate
-    post :publish
-    get :publish_preview
   end
-  resources :shopping_list_items, only: [ :update ] do
-    collection { patch :bulk_update }
-  end
+  resources :shopping_list_items, only: [ :update ]
 
   # The board. need/have take a spoken or typed name rather than an id, because
   # that's what a voice assistant has — see ShoppingBoard.
